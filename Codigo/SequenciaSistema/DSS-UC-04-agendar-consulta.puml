@@ -1,0 +1,27 @@
+@startuml DSS-UC-04
+title VetCare+ - Diagrama de Sequencia do Sistema - UC-04: Agendar Consulta
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor Tutor
+participant ":Sistema VetCare+" as Sistema
+
+Tutor -> Sistema : informarDadosLogin(email, senha)
+Sistema --> Tutor : sessaoAutenticada(token)
+
+Tutor -> Sistema : solicitarAgendamento(petId, vetId, dataHora, motivo)
+Sistema --> Tutor : disponibilidade verificada
+
+alt horario disponivel e validacoes ok
+  Sistema --> Tutor : agendamento confirmado(consultaId, dataHora)
+  Sistema --> Tutor : notificacao "lembrete em 24h sera enviado"
+else conflito de horario (RN-01)
+  Sistema --> Tutor : erro "veterinario indisponivel no horario"
+else especialidade incompativel (RN-10)
+  Sistema --> Tutor : erro "veterinario nao atende essa especie"
+end
+
+@enduml

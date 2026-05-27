@@ -1,0 +1,40 @@
+@startuml comunicacao-UC11
+title VetCare+ - Diagrama de Comunicacao UC-11: Pagar Consulta (Pix)
+
+object "Tutor" as Tutor <<actor>>
+object "SPA React" as UI
+object "PagamentoController" as Ctrl
+object "PagamentoService" as Svc
+object "PagamentoRepo" as Repo
+object "Gateway Pix" as Pix
+object "RabbitMQ" as MQ
+object "NotificacaoWorker" as Notif
+
+Tutor --> UI : 1: confirmar pagamento Pix
+UI --> Ctrl : 2: POST /pagamentos (consultaId, valor)
+Ctrl --> Svc : 3: pagar(consultaId, PIX, valor)
+Svc --> Repo : 4: criar(Pagamento(PENDENTE))
+Repo --> Svc : 4.1: pagamento(id)
+Svc --> Pix : 5: gerarCobranca(valor, idempotencyKey)
+Pix --> Svc : 5.1: qrCode + txid + expiraEm
+Svc --> Repo : 6: atualizar(status=PROCESSANDO, txid)
+Svc --> Ctrl : 7: QrCodeDTO
+Ctrl --> UI : 8: 200 OK + qrCode
+UI --> Tutor : 9: exibir QR Code
+
+Pix --> Ctrl : 10: webhook(txid, APROVADO)
+Ctrl --> Svc : 11: confirmar(txid)
+Svc --> Repo : 12: atualizar(status=APROVADO, pagoEm)
+Svc --> MQ : 13: publicar(PagamentoConfirmadoEvent)
+MQ --> Notif : 14: consumir evento
+Notif --> Tutor : 15: enviar recibo por e-mail
+
+note bottom
+  Fluxo resumido:
+  1-9. Tutor inicia cobranca e recebe QR.
+  10-12. Gateway confirma via webhook.
+  13-15. Sistema publica evento e dispara recibo.
+  RN-08: Pix expira em 15 min sem confirmacao.
+end note
+
+@enduml

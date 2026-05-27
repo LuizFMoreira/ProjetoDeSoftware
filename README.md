@@ -116,7 +116,12 @@ Os fontes em PlantUML ficam em [Codigo/](Codigo/), organizados por tipo. As imag
 - [Casos de Uso](Codigo/CasosDeUso/diagrama-de-caso-de-uso.puml) — 16 UCs cobrindo os 4 perfis + atores externos.
 - [Classes](Codigo/Classes/diagrama-de-classes.puml) — entidades de domínio, enums, interface `Autenticavel`.
 
-**Sequência** (1 por caso de uso principal)
+**Sequência do Sistema (DSS — visão black-box, seção 2.3 do template)**
+- [DSS UC-04 Agendar Consulta](Codigo/SequenciaSistema/DSS-UC-04-agendar-consulta.puml)
+- [DSS UC-10 Aplicar Vacina](Codigo/SequenciaSistema/DSS-UC-10-aplicar-vacina.puml)
+- [DSS UC-11 Pagar Consulta](Codigo/SequenciaSistema/DSS-UC-11-pagar-consulta.puml)
+
+**Sequência (detalhada — visão white-box, seção 3.4 do template)**
 - [UC-04 Agendar Consulta](Codigo/Sequencia/UC-04-agendar-consulta.puml)
 - [UC-05 Cancelar Consulta](Codigo/Sequencia/UC-05-cancelar-consulta.puml)
 - [UC-07 Atender Consulta](Codigo/Sequencia/UC-07-atender-consulta.puml)
@@ -135,6 +140,7 @@ Os fontes em PlantUML ficam em [Codigo/](Codigo/), organizados por tipo. As imag
 - [Componentes e Implantação](Codigo/Componentes/diagrama-de-componentes-e-implantacao.puml)
 - [Comunicação — UC-04](Codigo/Comunicacao/comunicacao-UC04-agendar-consulta.puml)
 - [Comunicação — UC-10](Codigo/Comunicacao/comunicacao-UC10-aplicar-vacina.puml)
+- [Comunicação — UC-11](Codigo/Comunicacao/comunicacao-UC11-pagar-consulta.puml)
 - [Modelo Entidade-Relacionamento](Codigo/ER/diagrama-er-vetcareplus.puml)
 
 Pra abrir, dá pra usar a extensão PlantUML do VS Code (`Alt+D` renderiza ao lado) ou colar no <https://www.plantuml.com/plantuml/uml/>.

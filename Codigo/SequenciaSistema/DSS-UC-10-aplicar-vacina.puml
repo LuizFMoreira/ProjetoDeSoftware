@@ -1,0 +1,25 @@
+@startuml DSS-UC-10
+title VetCare+ - Diagrama de Sequencia do Sistema - UC-10: Aplicar Vacina
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor Veterinario
+participant ":Sistema VetCare+" as Sistema
+
+Veterinario -> Sistema : selecionarPet(petId)
+Sistema --> Veterinario : dados do pet (especie, idade, historico de vacinas)
+
+Veterinario -> Sistema : registrarAplicacao(tipoVacina, lote)
+
+alt vacina compativel com especie e idade
+  Sistema --> Veterinario : aplicacao registrada
+  Sistema --> Veterinario : proxima dose calculada (RN-04, RN-05)
+  Sistema --> Veterinario : lembretes agendados (30 e 7 dias antes)
+else protocolo incompativel
+  Sistema --> Veterinario : erro "vacina incompativel com a especie ou idade"
+end
+
+@enduml

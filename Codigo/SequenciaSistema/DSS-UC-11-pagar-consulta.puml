@@ -1,0 +1,30 @@
+@startuml DSS-UC-11
+title VetCare+ - Diagrama de Sequencia do Sistema - UC-11: Pagar Consulta (Pix)
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor Tutor
+participant ":Sistema VetCare+" as Sistema
+
+Tutor -> Sistema : iniciarPagamento(consultaId, metodo=PIX, valor)
+Sistema --> Tutor : QR Code Pix (validade 15min)
+
+== Aguardando confirmacao do pagamento ==
+
+alt Pix pago dentro de 15 minutos
+  Sistema --> Tutor : pagamento confirmado
+  Sistema --> Tutor : recibo enviado por e-mail
+else Pix expirou (RN-08)
+  Sistema --> Tutor : cobranca expirou
+  note right of Sistema
+    Consulta volta para
+    AGUARDANDO_PAGAMENTO.
+  end note
+else Pix recusado pelo gateway
+  Sistema --> Tutor : pagamento recusado
+end
+
+@enduml

@@ -22,8 +22,7 @@ EM_ATENDIMENTO --> REALIZADA : registrarProntuario()\n[anamnese e diagnostico ok
 REALIZADA --> AGUARDANDO_PAGAMENTO : prontuario fechado\n/ gerar cobranca
 
 AGUARDANDO_PAGAMENTO --> PAGA : pagamento confirmado
-AGUARDANDO_PAGAMENTO : entry / cobranca ativa
-AGUARDANDO_PAGAMENTO : Pix expirou (RN-08) / gerar nova cobranca
+AGUARDANDO_PAGAMENTO --> AGUARDANDO_PAGAMENTO : Pix expirou (RN-08)\n/ gerar nova cobranca
 
 PAGA --> [*]
 CANCELADA --> [*]
