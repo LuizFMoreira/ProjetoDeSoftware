@@ -25,18 +25,8 @@ Trabalho desenvolvido por **Luiz F. Moreira** como parte da disciplina de Projet
 
 1. [Introdução](#1-introdução)
 2. [Modelos de Usuário e Requisitos](#2-modelos-de-usuário-e-requisitos)
-   - 2.1 Descrição dos Atores
-   - 2.2 Regras de Negócio
-   - 2.3 Modelo de Casos de Uso
-   - 2.4 Diagrama de Casos de Uso
 3. [Contratos de Operação](#3-contratos-de-operação)
 4. [Modelos de Projeto](#4-modelos-de-projeto)
-   - 4.1 Arquitetura
-   - 4.2 Componentes e Implantação
-   - 4.3 Diagrama de Classes
-   - 4.4 Diagramas de Sequência
-   - 4.5 Diagramas de Comunicação
-   - 4.6 Diagramas de Estado
 5. [Modelos de Dados](#5-modelos-de-dados)
 6. [Escopo do MVP e Versões Futuras](#6-escopo-do-mvp-e-versões-futuras)
 
@@ -44,13 +34,13 @@ Trabalho desenvolvido por **Luiz F. Moreira** como parte da disciplina de Projet
 
 ## 1. Introdução
 
-O VetCare+ é um sistema de gestão para clínicas veterinárias. Cobre agendamento de consultas, prontuário eletrônico do pet, controle de vacinação com lembretes automáticos, pagamento integrado (Pix e cartão) e relatórios financeiros para o administrador.
+O VetCare+ é um sistema de gestão para clínicas veterinárias. Cuida de agendamento, prontuário do pet, controle de vacinação com lembrete automático, pagamento por Pix ou cartão e relatório financeiro pro administrador.
 
-A motivação veio de um problema real: minha tia toca uma clínica veterinária de bairro e, até hoje, controla agenda em caderno e ficha do animal em papel. Quando cliente liga pra remarcar, é confusão. Quando vacina vence, ninguém avisa. Quando o mês acaba, ela tem que somar recibo a mão pra saber quanto entrou.
+Quem inspirou o projeto foi minha tia. Ela toca uma clínica de bairro há mais de dez anos e até hoje controla agenda em caderno e ficha de animal em papel. Quando o cliente liga pra remarcar, vira confusão. Quando a vacina antirrábica vence, ninguém avisa e o pet some por meses. No fim do mês ela soma recibo a mão pra saber quanto entrou. Vi isso de perto e quis modelar um sistema que resolvesse esse caos sem ser pesado demais pra uma clínica desse porte.
 
-Este documento descreve a modelagem completa do sistema — atores, regras de negócio, casos de uso, arquitetura, classes, sequências, estados e modelo de dados. O foco é arquitetural e de design; não há código implementado.
+Aqui não tem código — só modelagem. O que entrego é a arquitetura, os casos de uso, as classes, as sequências, os estados e o modelo de dados.
 
-O sistema foi projetado em **microsserviços** porque, embora uma clínica única caiba num monolito, o desenho aqui foi pensado pra escalar pra uma rede de clínicas (modelo Petz/Cobasi). Os limites entre serviços seguem fronteiras de domínio: agendamento, prontuário clínico e pagamento são contextos diferentes com ciclos de mudança diferentes.
+Optei por desenhar em **microsserviços**. Pra uma clínica única seria exagero (um monolito Spring Boot resolveria), mas quis projetar pra cenário de rede — algo do tipo Petz ou Cobasi, em que cada contexto (agendamento, prontuário, pagamento) tem ciclo de mudança e equipe própria. Os limites entre serviços seguiram fronteiras de domínio, não de tabela.
 
 ---
 
@@ -58,13 +48,13 @@ O sistema foi projetado em **microsserviços** porque, embora uma clínica únic
 
 ### 2.1 Descrição dos Atores
 
-**Tutor** — Dono do pet. Cria sua conta com CPF, cadastra um ou mais animais e usa o sistema pra agendar consultas, consultar o histórico do pet (prontuário, vacinas), pagar atendimentos pelo app e receber lembretes de vacina vencendo. É o ator com menor privilégio: só enxerga os próprios pets.
+O **Tutor** é o dono do pet. Cria conta com CPF, cadastra um ou mais animais e usa o app pra marcar consulta, ver o histórico (prontuário e vacina), pagar e receber aviso quando o reforço tá perto. Só enxerga os próprios pets.
 
-**Recepcionista** — Funcionária do balcão. Faz quase tudo que o tutor faz, mas em nome dele: agenda e cancela consulta por telefone, cadastra pet quando o tutor chega sem conta, registra o pagamento presencial e visualiza a agenda do dia pra organizar a sala de espera. Não acessa o prontuário clínico em detalhe.
+A **Recepcionista** trabalha no balcão. Faz quase tudo que o tutor faz, só que em nome dele — comum no dia a dia da clínica, quando o cliente liga pedindo pra marcar ou chega no balcão sem conta. Também registra pagamento presencial e organiza a agenda do dia. Não entra no prontuário em detalhe; isso é território do vet.
 
-**Veterinário** — Profissional com CRMV ativo. Atende a consulta, preenche o prontuário (anamnese, diagnóstico, observações), aplica vacinas seguindo o protocolo da espécie, prescreve medicamentos e solicita exames. Só consegue editar prontuário das consultas que ele está atendendo no momento.
+O **Veterinário** precisa ter CRMV ativo. Atende a consulta e preenche o prontuário com anamnese, diagnóstico e observações. Também aplica vacina conforme protocolo da espécie, prescreve medicamento e pede exame. Só edita prontuário das consultas que está atendendo no momento — isso vem da RN-13 (histórico imutável).
 
-**Administrador** — Dono ou gerente da clínica. Cuida do cadastro de veterinários (admissão e desligamento), define a tabela de serviços e preços, emite relatórios financeiros mensais e gerencia permissões. É o único que pode reabrir consultas finalizadas ou estornar pagamentos. Em clínica pequena, normalmente é a mesma pessoa que toca o balcão.
+O **Administrador** é o dono ou gerente. Cadastra e desliga vet, define tabela de preço, emite relatório financeiro e mexe nas permissões. É o único que reabre consulta finalizada ou estorna pagamento. Em clínica pequena costuma ser a mesma pessoa do balcão — e foi pensando nesse caso (que é o da minha tia) que separei o papel de "Administrador" do de "Recepcionista" mesmo sabendo que muitas vezes vai ser a mesma pessoa logada.
 
 **Atores externos:**
 
@@ -93,52 +83,50 @@ O sistema foi projetado em **microsserviços** porque, embora uma clínica únic
 
 ### 2.3 Modelo de Casos de Uso
 
-O sistema tem 16 casos de uso. Os UCs marcados como "include" são incluídos por todos os outros que exigem usuário autenticado, evitando repetição na modelagem.
+São 16 UCs no total. Os marcados como `<<include>>` (UC-01 e UC-16) entram em todos os fluxos que dependem deles — não dá pra agendar sem autenticar nem agendar sem disparar notificação.
 
-**UC-01 — Autenticar.** Incluído por todos os UCs autenticados. Verifica e-mail e senha (BCrypt), aplica RN-14 e emite JWT válido por 24 horas. Ator: Usuário genérico.
+**UC-01 — Autenticar.** Verifica e-mail e senha (BCrypt), aplica a RN-14 e emite JWT válido por 24h. Ator: usuário genérico.
 
-**UC-02 — Gerenciar Perfil.** Permite que qualquer usuário autenticado atualize seus dados cadastrais e troque a senha. Ator: Usuário.
+**UC-02 — Gerenciar Perfil.** Qualquer usuário autenticado atualiza seus dados e troca senha.
 
-**UC-03 — Cadastrar Pet.** Tutor cadastra um novo pet vinculado ao próprio CPF (RN-03). Validações de espécie, peso e data de nascimento. Ator principal: Tutor.
+**UC-03 — Cadastrar Pet.** Tutor cadastra pet vinculado ao próprio CPF (RN-03). Valida espécie, peso e data de nascimento.
 
-**UC-04 — Agendar Consulta.** Tutor (ou recepcionista em nome dele) reserva um horário com um veterinário. Inclui UC-01 e UC-16. Pré-condições: pet ativo (RN-15), vet com agenda aberta, especialidade compatível (RN-10), sem conflito de horário (RN-01).
+**UC-04 — Agendar Consulta.** Tutor (ou recepcionista em nome dele) reserva horário com um vet. Inclui UC-01 e UC-16. Pré: pet ativo (RN-15), vet com agenda aberta, especialidade compatível (RN-10), sem conflito de horário (RN-01).
 
-**UC-05 — Cancelar Consulta.** Tutor, recepcionista ou admin cancela uma consulta agendada. Se for com menos de 2h de antecedência, aplica taxa de 50% (RN-02). Se já estiver paga, dispara estorno via ms-pagamento.
+**UC-05 — Cancelar Consulta.** Tutor, recepcionista ou admin cancela uma consulta agendada. Se for menos de 2h antes, aplica taxa de 50% (RN-02). Se já estiver paga, dispara estorno via ms-pagamento.
 
-**UC-06 — Reagendar Consulta.** Variação do cancelamento que mantém o ID da consulta original e move pra nova data. Útil pra preservar o histórico vinculado.
+**UC-06 — Reagendar Consulta.** Variação do cancelamento. Mantém o ID original e move pra nova data — assim preserva o histórico vinculado.
 
-**UC-07 — Atender Consulta.** Veterinário inicia o atendimento e preenche o prontuário. Inclui UC-08 (registrar prontuário). Pode estender pra UC-09 (prescrição) e UC-10 (vacina). Ao concluir, marca consulta como REALIZADA (RN-07).
+**UC-07 — Atender Consulta.** Vet inicia o atendimento e preenche o prontuário. Inclui UC-08; pode estender pra UC-09 (prescrição) e UC-10 (vacina). No fim, marca a consulta como REALIZADA (RN-07).
 
-**UC-08 — Registrar Prontuário.** Vet preenche anamnese, diagnóstico e observações. Imutável após gravado (RN-13). Vincula automaticamente à consulta em andamento.
+**UC-08 — Registrar Prontuário.** Anamnese, diagnóstico e observações. Imutável depois de gravado (RN-13).
 
-**UC-09 — Prescrever Medicamento.** Vet adiciona prescrição ao prontuário com posologia e duração. Se medicamento for controlado, valida CRMV ativo (RN-06).
+**UC-09 — Prescrever Medicamento.** Vet adiciona prescrição com posologia e duração. Se for controlado, valida CRMV (RN-06).
 
-**UC-10 — Aplicar Vacina.** Vet registra aplicação de vacina, lote e calcula próxima dose automaticamente conforme protocolo (RN-04, RN-05). Agenda lembretes 30 e 7 dias antes do vencimento.
+**UC-10 — Aplicar Vacina.** Vet registra aplicação e lote. Sistema calcula a próxima dose pelo protocolo (RN-04, RN-05) e agenda lembrete 30 e 7 dias antes.
 
-**UC-11 — Pagar Consulta.** Tutor (ou recepcionista) inicia pagamento via Pix ou cartão. Integra com Gateway de Pagamento externo. Pix expira em 15 minutos sem confirmação (RN-08).
+**UC-11 — Pagar Consulta.** Tutor ou recepcionista paga por Pix ou cartão. Integra com o Gateway externo. Pix expira em 15 min sem confirmação (RN-08).
 
-**UC-12 — Visualizar Agenda do Dia.** Veterinário e recepcionista veem a lista de consultas do dia, com status (agendada, confirmada, em atendimento, realizada).
+**UC-12 — Visualizar Agenda do Dia.** Vet e recepcionista veem a lista do dia, com status (agendada, confirmada, em atendimento, realizada).
 
-**UC-13 — Ver Prontuário do Pet.** Tutor consulta histórico do próprio pet. Veterinário consulta histórico de qualquer pet da clínica.
+**UC-13 — Ver Prontuário do Pet.** Tutor vê o histórico do próprio pet. Vet vê de qualquer pet da clínica.
 
-**UC-14 — Gerenciar Veterinários.** Administrador cadastra, ativa ou desliga veterinários. Define especialidade e carga horária.
+**UC-14 — Gerenciar Veterinários.** Admin cadastra, ativa ou desliga vet. Define especialidade e carga horária.
 
-**UC-15 — Gerar Relatório Financeiro.** Administrador gera relatório mensal consolidando pagamentos confirmados (RN-11). Exporta em PDF.
+**UC-15 — Gerar Relatório Financeiro.** Admin gera relatório mensal de pagamentos confirmados (RN-11). Saída em PDF.
 
-**UC-16 — Notificar.** Incluído por UC-04, UC-05, UC-10. Encapsula a lógica de envio de notificações (e-mail) com retry e descarte após 3 falhas (RN-12).
+**UC-16 — Notificar.** Incluído por UC-04, UC-05 e UC-10. Encapsula envio de e-mail com retry e descarte após 3 falhas (RN-12).
 
 ### 2.4 Diagrama de Casos de Uso
 
 > Fonte: [`Codigo/CasosDeUso/diagrama-de-caso-de-uso.puml`](../Codigo/CasosDeUso/diagrama-de-caso-de-uso.puml)
-> Imagem: [`Modelagem/CasosDeUso/diagrama-de-caso-de-uso.png`](../Modelagem/CasosDeUso/diagrama-de-caso-de-uso.png)
+> Imagem: [`Modelagem/CasosDeUso/casos-de-uso.png`](../Modelagem/CasosDeUso/casos-de-uso.png)
 
-O diagrama mostra a hierarquia de atores (Usuário abstrato → Tutor, Recepcionista, Veterinário, Administrador), os 16 casos de uso e suas relações `<<include>>` e `<<extend>>`.
+O diagrama mostra a hierarquia de atores (Usuário abstrato → Tutor, Recepcionista, Veterinário, Administrador), os 16 UCs e as relações `<<include>>` e `<<extend>>`.
 
 ---
 
 ## 3. Contratos de Operação
-
-Cada contrato descreve uma operação principal do sistema, com pré e pós-condições.
 
 ### CT-01 — agendarConsulta
 
@@ -216,7 +204,7 @@ Cada contrato descreve uma operação principal do sistema, com pré e pós-cond
 
 ### 4.1 Arquitetura
 
-O sistema segue arquitetura de **microsserviços** com seis serviços, cada um com seu próprio banco PostgreSQL. A comunicação entre serviços é majoritariamente assíncrona via RabbitMQ — eventos de domínio são publicados quando algo relevante acontece (consulta agendada, vacina aplicada, pagamento confirmado) e consumidos por quem precisar reagir.
+São seis microsserviços, cada um com seu PostgreSQL. A conversa entre eles passa por RabbitMQ quase sempre — quando algo importante acontece (consulta marcada, vacina aplicada, pagamento confirmado), o serviço publica o evento e quem se importa consome. REST síncrono ficou só onde a resposta faz parte da UX direta: marcar, pagar, atender.
 
 | Serviço          | Responsabilidade |
 |------------------|------------------|
@@ -227,48 +215,37 @@ O sistema segue arquitetura de **microsserviços** com seis serviços, cada um c
 | ms-notificacao   | Worker que consome a fila e dispara e-mail. Scheduler de lembretes. |
 | ms-relatorios    | Leitura cruzada de pagamento e agendamento para relatórios. |
 
-Por dentro de cada serviço, mantive a estrutura Spring Boot em camadas:
+Por dentro, mantive a divisão clássica de Spring Boot: controller só recebe HTTP e valida; service segura a regra de negócio (o "não pode marcar dois pets no mesmo horário pro mesmo vet" mora aí); repository é Spring Data JPA puro; DTO separa entidade de contrato de API. Nada inovador — é o que funciona e o que outro dev entende rápido.
 
-- **Controller** recebe a requisição HTTP, valida e devolve o DTO.
-- **Service** concentra a regra de negócio (ex.: "não dá pra agendar dois pets no mesmo horário pro mesmo vet").
-- **Repository** conversa com o banco via Spring Data JPA.
-- **DTO** isola a entidade do contrato da API.
+Na borda fica um API Gateway que valida o JWT e roteia via ALB. Front-end React (SPA) e React Native (mobile) entram por CloudFront → API Gateway.
 
-Na frente fica um **API Gateway** que valida o JWT na borda e roteia pros serviços via Application Load Balancer. Front-end React (SPA) e React Native (mobile) entram por CloudFront → API Gateway.
+Os padrões que usei foram Repository, Service Layer e DTO no tradicional. Event-Driven via RabbitMQ pra desacoplar serviço de notificação e relatório. Strategy entrou no cálculo de próxima dose de vacina, porque o protocolo muda por tipo (antirrábica é anual, V8/V10 tem ciclo escalonado, etc.) — codificar isso em `if` ia ficar feio. E Factory na criação de notificação por canal, prevendo que um dia entra WhatsApp.
 
-**Padrões de projeto adotados:** Repository (acesso a dados), Service Layer (regras de negócio), DTO (transferência), Event-Driven (RabbitMQ desacopla os serviços), Strategy (cálculo de próxima dose de vacina por protocolo), Factory (criação de notificações por canal).
+**Sobre microsserviços vs monolito.** Já mencionei na introdução, mas vale registrar aqui: pra clínica única isso é overengineering. Reconheço. A justificativa é que o desenho mira numa rede de clínicas — naquele cenário, ter o ms-pagamento isolado (com seu próprio time, seu próprio ciclo de deploy, sua certificação PCI à parte) faz sentido. Se fosse implementar de novo só pra minha tia, faria um monolito modular com os mesmos limites de domínio, e migrava se a hora chegasse.
 
-**Decisões importantes:**
+**Banco por serviço, sem join entre eles.** Quando ms-relatorios precisa cruzar pagamento com agendamento, ou ele lê dos dois bancos em read-only ou consome eventos e monta sua própria view materializada. Aceitei a consistência eventual — relatório pode demorar uns segundos pra refletir um pagamento que acabou de cair, e tá tudo bem.
 
-1. **Microsserviços com banco por serviço.** Cada ms tem seu próprio banco, sem joins entre eles. Quando ms-relatorios precisa cruzar dados de pagamento e agendamento, lê dos dois bancos (read-only) ou consome eventos pra construir uma view materializada.
-2. **Comunicação assíncrona como default.** Notificação e atualização de relatório vão por fila. REST síncrono só nos fluxos onde a resposta é parte da UX (agendar, pagar, atender).
-3. **JWT stateless.** Sem sessão no servidor. Token validado no API Gateway e propagado.
-4. **Banco relacional (PostgreSQL).** Domínio tem transações ACID (pagamento, agendamento), então NoSQL não compensa.
-
-**Trade-offs assumidos:**
-
-- Microsserviços trazem complexidade operacional (orquestração, observabilidade, deploy). Pra uma clínica única isso é exagero. A escolha é justificada pelo desenho voltado pra rede de clínicas.
-- Consistência eventual entre serviços via fila — relatórios podem demorar alguns segundos pra refletir um pagamento recém-confirmado.
+**JWT stateless** e **PostgreSQL** vieram quase como decisões default. Pagamento e agendamento querem ACID, então NoSQL ficou de fora.
 
 ### 4.2 Componentes e Implantação
 
 > Fonte: [`Codigo/Componentes/diagrama-de-componentes-e-implantacao.puml`](../Codigo/Componentes/diagrama-de-componentes-e-implantacao.puml)
 
-O diagrama mostra a separação física: clientes (Web e Mobile) → CloudFront → API Gateway → ALB → cluster Docker/ECS com os seis microsserviços e seus bancos. RabbitMQ orquestra a comunicação assíncrona. Externos: gateway de pagamento, SMTP e S3 (anexos de exame).
+O diagrama separa o lado físico: Web e Mobile passam por CloudFront e API Gateway, batem no ALB e caem no cluster Docker/ECS onde rodam os seis microsserviços com seus bancos. RabbitMQ orquestra a troca assíncrona. Por fora ficam o gateway de pagamento, o SMTP e o S3 (anexos de exame).
 
 ### 4.3 Diagrama de Classes
 
 > Fonte: [`Codigo/Classes/diagrama-de-classes.puml`](../Codigo/Classes/diagrama-de-classes.puml)
 
-O modelo de domínio gira em torno da hierarquia `Usuario` (abstrata) → Tutor, Recepcionista, Veterinario, Administrador. A interface `Autenticavel` define o contrato pra qualquer entidade autenticável.
+O modelo de domínio gira em torno da hierarquia `Usuario` (abstrata) → Tutor, Recepcionista, Veterinario, Administrador. A interface `Autenticavel` define o contrato pra qualquer entidade que precisa logar.
 
-Entidades principais: `Pet`, `Consulta` (com enum `StatusConsulta` cobrindo todo o ciclo de vida), `Prontuario`, `Vacina` e a classe associativa `AplicacaoVacina` (entre Pet, Vacina e Prontuário, carregando lote e próxima dose), `Prescricao`, `Medicamento`, `Pagamento`, `Notificacao`.
+As entidades de negócio são `Pet`, `Consulta` (com o enum `StatusConsulta` cobrindo todo o ciclo de vida dela), `Prontuario`, `Vacina` e a classe associativa `AplicacaoVacina` (que fica entre Pet, Vacina e Prontuário carregando lote e próxima dose), `Prescricao`, `Medicamento`, `Pagamento` e `Notificacao`.
 
-Enums modelam valores fixos: `StatusConsulta`, `TipoConsulta`, `EspecieAnimal`, `Especialidade`, `TipoVacina`, `MetodoPagamento`, `StatusPagamento`, `CanalNotificacao`, `StatusNotificacao`, `StatusPet`, `StatusUsuario`.
+Os enums (`StatusConsulta`, `TipoConsulta`, `EspecieAnimal`, `Especialidade`, `TipoVacina`, `MetodoPagamento`, `StatusPagamento`, `CanalNotificacao`, `StatusNotificacao`, `StatusPet`, `StatusUsuario`) ficaram explícitos no diagrama porque ajudam a entender o domínio sem ter que abrir o código.
 
 ### 4.4 Diagramas de Sequência
 
-Sete diagramas de sequência cobrem os fluxos principais. Cada um mostra interação entre cliente, API Gateway, microsserviço responsável, repositórios e (quando aplicável) RabbitMQ e serviços externos. Os fluxos alternativos (alt/opt) representam regras de negócio e exceções.
+Cobri os sete fluxos que importam. Cada um mostra a interação entre cliente, API Gateway, microsserviço, repositórios e — onde cabia — RabbitMQ e serviço externo. Os ramos `alt` e `opt` representam as RNs aplicáveis e os caminhos de exceção.
 
 | UC    | Cenário                          | Arquivo |
 |-------|----------------------------------|---------|
@@ -282,19 +259,19 @@ Sete diagramas de sequência cobrem os fluxos principais. Cada um mostra intera�
 
 ### 4.5 Diagramas de Comunicação
 
-Dois diagramas de comunicação, equivalentes em informação às sequências correspondentes mas com ênfase nos relacionamentos estruturais entre objetos:
+Fiz dois — mesma informação que as sequências, mas com o foco no quem-chama-quem em vez do quando:
 
 - [Comunicação UC-04 — Agendar Consulta](../Codigo/Comunicacao/comunicacao-UC04-agendar-consulta.puml)
 - [Comunicação UC-10 — Aplicar Vacina](../Codigo/Comunicacao/comunicacao-UC10-aplicar-vacina.puml)
 
 ### 4.6 Diagramas de Estado
 
-Quatro entidades têm ciclo de vida complexo o suficiente pra justificar diagrama de estados:
+Modelei estado pras quatro entidades cujo ciclo de vida tem peso suficiente:
 
-- **Consulta** — do agendamento até o pagamento, passando por confirmação, atendimento, realização. Inclui transições de cancelamento e falta. [`diagrama-de-estado-consulta.puml`](../Codigo/Estado/diagrama-de-estado-consulta.puml)
-- **Vacinação** — protocolo cíclico: pendente → aplicada → vencendo → vencida → reforço aplicado. Com guards de RN-04 e RN-05. [`diagrama-de-estado-vacinacao.puml`](../Codigo/Estado/diagrama-de-estado-vacinacao.puml)
-- **Pagamento** — pendente → processando → aprovado/recusado/expirado → confirmado/estornado. Com timeout Pix da RN-08. [`diagrama-de-estado-pagamento.puml`](../Codigo/Estado/diagrama-de-estado-pagamento.puml)
-- **Pet** — ativo → inativo transferido / óbito. Preserva histórico mesmo após inativação (RN-15). [`diagrama-de-estado-pet.puml`](../Codigo/Estado/diagrama-de-estado-pet.puml)
+- **Consulta** — do agendamento até o pagamento, passando por confirmação, atendimento e realização. Inclui cancelamento e falta. [`diagrama-de-estado-consulta.puml`](../Codigo/Estado/diagrama-de-estado-consulta.puml)
+- **Vacinação** — ciclo: pendente → aplicada → vencendo → vencida → reforço aplicado. Com guards das RN-04 e RN-05. [`diagrama-de-estado-vacinacao.puml`](../Codigo/Estado/diagrama-de-estado-vacinacao.puml)
+- **Pagamento** — pendente → processando → aprovado/recusado/expirado → confirmado/estornado. O timeout do Pix (RN-08) vive aqui. [`diagrama-de-estado-pagamento.puml`](../Codigo/Estado/diagrama-de-estado-pagamento.puml)
+- **Pet** — ativo → inativo (transferido ou óbito). Histórico preservado mesmo depois de inativado (RN-15). [`diagrama-de-estado-pet.puml`](../Codigo/Estado/diagrama-de-estado-pet.puml)
 
 ---
 
@@ -302,23 +279,23 @@ Quatro entidades têm ciclo de vida complexo o suficiente pra justificar diagram
 
 ### 5.1 Tecnologia de Persistência
 
-Cada microsserviço tem seu próprio banco **PostgreSQL 16**, sem compartilhamento direto. Acesso via Spring Data JPA + Hibernate.
+Cada microsserviço tem o próprio **PostgreSQL 16**, sem compartilhar tabela com vizinho. Acesso por Spring Data JPA + Hibernate.
 
-A herança da hierarquia `Usuario` é tratada por **tabelas separadas compartilhando chave primária** (table-per-subclass): tabela `usuarios` é a base; `tutores`, `recepcionistas`, `veterinarios` e `administradores` estendem com `id` referenciando `usuarios.id`. Permite consultas polimórficas via JOIN e mantém integridade.
+A herança da hierarquia `Usuario` ficou em **table-per-subclass**: uma tabela base `usuarios` e as filhas `tutores`, `recepcionistas`, `veterinarios` e `administradores`, cada uma com `id` referenciando `usuarios.id`. Escolhi essa estratégia em vez de `SINGLE_TABLE` porque os perfis têm atributos bem diferentes entre si (CRMV só faz sentido pra vet, grau de parentesco só pra responsável de tutor menor) e uma tabela única ficaria cheia de coluna nula.
 
-Valores enumerados (status, tipos, métodos) são armazenados como `varchar` pra facilitar leitura em SQL e relatórios, ao invés de inteiros.
+Enums são gravados como `varchar`, não inteiro. Custa um pouco mais de espaço, mas quando abro o psql pra debugar relatório consigo ler `CONFIRMADO` em vez de `3`.
 
 ### 5.2 Diagrama Entidade-Relacionamento
 
 > Fonte: [`Codigo/ER/diagrama-er-vetcareplus.puml`](../Codigo/ER/diagrama-er-vetcareplus.puml)
 
-O modelo conta com 14 tabelas distribuídas entre os bancos dos microsserviços:
+São 14 tabelas distribuídas pelos bancos:
 
 | Microsserviço    | Tabelas |
 |------------------|---------|
 | ms-usuarios      | `usuarios`, `tutores`, `recepcionistas`, `veterinarios`, `administradores` |
-| ms-agendamento   | `consultas` |
-| ms-prontuario    | `prontuarios`, `vacinas`, `aplicacoes_vacina`, `medicamentos`, `prescricoes`, `pets` |
+| ms-agendamento   | `consultas`, `pets` |
+| ms-prontuario    | `prontuarios`, `vacinas`, `aplicacoes_vacina`, `medicamentos`, `prescricoes` |
 | ms-pagamento     | `pagamentos` |
 | ms-notificacao   | `notificacoes` |
 
@@ -340,32 +317,25 @@ O modelo conta com 14 tabelas distribuídas entre os bancos dos microsserviços:
 
 ### MVP (v1.0 — entrega)
 
-- Autenticação JWT com 4 perfis.
-- CRUD de tutor e pet.
-- Agendamento, cancelamento, reagendamento e atendimento de consulta.
-- Prontuário com anamnese, diagnóstico, vacinas e prescrições.
-- Pagamento por Pix e cartão via gateway externo.
-- Lembrete por e-mail (consulta 24h antes; vacina 30 e 7 dias antes do vencimento).
-- Relatório financeiro mensal.
+A v1.0 entrega o ciclo completo do dia a dia da clínica. JWT com os quatro perfis. Cadastro de tutor e pet. Agendamento com cancelamento e reagendamento. Atendimento com prontuário, vacina e prescrição. Pagamento por Pix e cartão. Lembrete por e-mail (24h antes da consulta; 30 e 7 dias antes do vencimento da vacina). Relatório financeiro mensal em PDF.
 
 ### v1.1 — Próximo ciclo
 
-- Upload de exames complementares (PDF, imagem) pra S3.
-- App mobile React Native para o tutor (visualizar agenda, prontuário, pagamento).
-- Notificação push.
+Upload de exame complementar (PDF e imagem) pro S3, app mobile do tutor em React Native e notificação push. Coisas que ampliam, mas não mudam o domínio.
 
 ### v2.0 — Visão de longo prazo
 
-- Notificação por WhatsApp como canal alternativo (RN-12 expandida).
-- Telemedicina veterinária (videoconsulta integrada).
-- Integração com farmácia veterinária parceira (entrega de medicação).
-- Programa de fidelidade.
+WhatsApp como canal alternativo de notificação (a RN-12 abre pra isso). Telemedicina veterinária com videoconsulta integrada. Integração com farmácia parceira pra entrega de medicação. Programa de fidelidade.
 
 ### Fora de escopo (decisão consciente)
 
-- **Estoque de medicamentos.** Clínica pequena terceiriza a venda — não vale o esforço de modelar.
-- **Internação e centro cirúrgico.** Domínio diferente, com regras próprias (anestesia, escala 24h). Mereceria um módulo separado.
-- **Faturamento por convênio pet.** Mercado ainda imaturo no perfil de cliente-alvo.
+Algumas coisas deixei de fora de propósito.
+
+**Estoque de medicamentos** não entrou porque clínica pequena terceiriza a venda — minha tia mesma encaminha pra petshop ao lado. Modelar entrada/saída de estoque ia ser mais sistema do que valor entregue.
+
+**Internação e centro cirúrgico** ficou fora porque é outro domínio: anestesia, escala 24h, monitoramento contínuo. Merece módulo separado e talvez um ms próprio. Tentar enfiar no agendamento ia poluir tudo.
+
+**Faturamento por convênio pet** (Petlove Saúde, Pet Vital) ficou de fora porque o mercado ainda é pequeno no perfil de cliente que tenho em mente. Quando ganhar tração, vira tema pra uma v3.
 
 ---
 
