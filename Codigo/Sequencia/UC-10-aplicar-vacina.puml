@@ -1,0 +1,53 @@
+@startuml UC-10-aplicar-vacina
+title VetCare+ - Sequencia UC-10: Aplicar Vacina com Calculo de Reforco
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor Veterinario
+participant "SPA React" as UI
+participant "ms-prontuario\nVacinaController" as Ctrl
+participant "VacinaService" as Svc
+participant "ProtocoloVacinalService" as Prot
+participant "VacinaRepo" as Repo
+queue "RabbitMQ" as MQ
+participant "ms-notificacao\nAgendadorLembretes" as Agenda
+
+Veterinario -> UI : seleciona pet e tipo de vacina
+UI -> Ctrl : POST /vacinas (petId, tipo, lote)
+Ctrl -> Svc : aplicar(petId, vetId, tipo, lote)
+
+Svc -> Repo : buscarPet(petId)
+Repo --> Svc : Pet(especie, dataNascimento)
+
+Svc -> Prot : protocoloPara(tipo, especie, idadePet)
+alt protocolo inexistente para especie
+  Prot --> Svc : null
+  Svc --> Ctrl : ProtocoloInvalidoException
+  Ctrl --> UI : 422 "Vacina incompativel"
+else protocolo encontrado
+  Prot --> Svc : ProtocoloVacinal(intervaloDias)
+
+  alt pet jovem (< 4 meses) e tipo V8/V10 (RN-05)
+    Svc -> Svc : proximaDose = hoje + 21 dias
+  else vacina antirrabica (RN-04)
+    Svc -> Svc : proximaDose = hoje + 365 dias
+  else adulto, reforco anual
+    Svc -> Svc : proximaDose = hoje + intervaloDias
+  end
+
+  Svc -> Repo : salvar(AplicacaoVacina(data=hoje, lote, proximaDose))
+  Repo --> Svc : aplicacao(id)
+
+  Svc -> MQ : publicar(VacinaAplicadaEvent)
+  MQ -> Agenda : agendar lembrete 30 dias antes
+  MQ -> Agenda : agendar lembrete 7 dias antes
+
+  Svc --> Ctrl : VacinaDTO
+  Ctrl --> UI : 201 Created
+  UI --> Veterinario : "Vacina registrada. Reforco em DD/MM"
+end
+
+@enduml

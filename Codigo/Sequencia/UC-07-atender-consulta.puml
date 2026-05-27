@@ -1,0 +1,67 @@
+@startuml UC-07-atender-consulta
+title VetCare+ - Sequencia UC-07: Atender Consulta e Registrar Prontuario
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor Veterinario
+participant "SPA React" as UI
+participant "API Gateway" as GW
+participant "ms-prontuario\nProntuarioController" as Ctrl
+participant "ProntuarioService" as Svc
+participant "ConsultaService\n(ms-agendamento)" as ConsultaSvc
+participant "ProntuarioRepo" as ProntRepo
+participant "PrescricaoService" as PrescSvc
+participant "VacinaService" as VacSvc
+
+== Inicio do atendimento ==
+Veterinario -> UI : abre consulta do dia
+UI -> GW : PATCH /api/consultas/{id}/iniciar (JWT)
+GW -> Ctrl : iniciarAtendimento
+Ctrl -> ConsultaSvc : atualizar(status=EM_ATENDIMENTO)
+ConsultaSvc --> Ctrl : ok
+
+== Registro do prontuario ==
+Veterinario -> UI : preenche anamnese e diagnostico
+UI -> GW : POST /api/prontuarios (JWT)
+GW -> Ctrl : registrarProntuario(dto)
+Ctrl -> Svc : registrar(consultaId, vetId, dados)
+
+Svc -> Svc : RN-07 valida anamnese e diagnostico
+alt dados invalidos
+  Svc --> Ctrl : ValidacaoException
+  Ctrl --> UI : 422
+else dados ok
+  Svc -> ProntRepo : salvar(Prontuario)
+  ProntRepo --> Svc : prontuario(id)
+
+  opt vet prescreve medicamento (UC-09)
+    Veterinario -> UI : adiciona prescricao
+    UI -> Ctrl : POST /prontuarios/{id}/prescricoes
+    Ctrl -> PrescSvc : prescrever(dto)
+    PrescSvc -> PrescSvc : RN-06 valida CRMV ativo
+    PrescSvc -> ProntRepo : salvar(Prescricao)
+  end
+
+  opt vet aplica vacina (UC-10)
+    Veterinario -> UI : registra vacina
+    UI -> Ctrl : POST /prontuarios/{id}/vacinas
+    Ctrl -> VacSvc : aplicar(dto)
+    VacSvc -> ProntRepo : salvar(AplicacaoVacina)
+  end
+
+  Svc -> ConsultaSvc : concluir(consultaId, status=REALIZADA)
+  ConsultaSvc --> Svc : ok
+  note right of ConsultaSvc
+    Apos REALIZADA, transicao para
+    AGUARDANDO_PAGAMENTO ocorre via
+    evento ProntuarioFechadoEvent.
+  end note
+  Svc --> Ctrl : ProntuarioDTO
+  Ctrl --> UI : 201 Created
+  UI --> Veterinario : "Atendimento concluido"
+end
+
+@enduml

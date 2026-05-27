@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>VetCarePlus-Documentacao.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="documentação-de-projeto--vetcare">Documentação de Projeto — VetCare+</h1>
+<p><strong>Sistema de Gestão para Clínica Veterinária</strong></p>
+<p>Versão 1.0 — 27 de maio de 2026</p>
+<p>Trabalho desenvolvido por <strong>Luiz F. Moreira</strong> como parte da disciplina de Projeto de Software.</p>
+<hr>
+<h2 id="histórico-de-revisões">Histórico de Revisões</h2>
+<table>
+<thead>
+<tr>
+<th>Versão</th>
+<th>Data</th>
+<th>Autor</th>
+<th>Mudança</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1</td>
+<td>08/05/2026</td>
+<td>Luiz</td>
+<td>Esboço inicial dos casos de uso e diagrama de classes.</td>
+</tr>
+<tr>
+<td>0.2</td>
+<td>12/05/2026</td>
+<td>Luiz</td>
+<td>Atores externos definidos; enums adicionados às classes.</td>
+</tr>
+<tr>
+<td>0.3</td>
+<td>15/05/2026</td>
+<td>Luiz</td>
+<td>Primeiro diagrama de sequência (Agendar Consulta).</td>
+</tr>
+<tr>
+<td>0.4</td>
+<td>19/05/2026</td>
+<td>Luiz</td>
+<td>Regras de Negócio (RN-01 a RN-15) e contratos de operação.</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>22/05/2026</td>
+<td>Luiz</td>
+<td>Diagramas de estado; sequências adicionais; refatoração para microsserviços.</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>27/05/2026</td>
+<td>Luiz</td>
+<td>Revisão final; descrição expandida dos UCs; entrega.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sumário">Sumário</h2>
+<ol>
+<li><a href="#1-introdu%C3%A7%C3%A3o">Introdução</a></li>
+<li><a href="#2-modelos-de-usu%C3%A1rio-e-requisitos">Modelos de Usuário e Requisitos</a>
+<ul>
+<li>2.1 Descrição dos Atores</li>
+<li>2.2 Regras de Negócio</li>
+<li>2.3 Modelo de Casos de Uso</li>
+<li>2.4 Diagrama de Casos de Uso</li>
+</ul>
+</li>
+<li><a href="#3-contratos-de-opera%C3%A7%C3%A3o">Contratos de Operação</a></li>
+<li><a href="#4-modelos-de-projeto">Modelos de Projeto</a>
+<ul>
+<li>4.1 Arquitetura</li>
+<li>4.2 Componentes e Implantação</li>
+<li>4.3 Diagrama de Classes</li>
+<li>4.4 Diagramas de Sequência</li>
+<li>4.5 Diagramas de Comunicação</li>
+<li>4.6 Diagramas de Estado</li>
+</ul>
+</li>
+<li><a href="#5-modelos-de-dados">Modelos de Dados</a></li>
+<li><a href="#6-escopo-do-mvp-e-vers%C3%B5es-futuras">Escopo do MVP e Versões Futuras</a></li>
+</ol>
+<hr>
+<h2 id="1-introdução">1. Introdução</h2>
+<p>O VetCare+ é um sistema de gestão para clínicas veterinárias. Cobre agendamento de consultas, prontuário eletrônico do pet, controle de vacinação com lembretes automáticos, pagamento integrado (Pix e cartão) e relatórios financeiros para o administrador.</p>
+<p>A motivação veio de um problema real: minha tia toca uma clínica veterinária de bairro e, até hoje, controla agenda em caderno e ficha do animal em papel. Quando cliente liga pra remarcar, é confusão. Quando vacina vence, ninguém avisa. Quando o mês acaba, ela tem que somar recibo a mão pra saber quanto entrou.</p>
+<p>Este documento descreve a modelagem completa do sistema — atores, regras de negócio, casos de uso, arquitetura, classes, sequências, estados e modelo de dados. O foco é arquitetural e de design; não há código implementado.</p>
+<p>O sistema foi projetado em <strong>microsserviços</strong> porque, embora uma clínica única caiba num monolito, o desenho aqui foi pensado pra escalar pra uma rede de clínicas (modelo Petz/Cobasi). Os limites entre serviços seguem fronteiras de domínio: agendamento, prontuário clínico e pagamento são contextos diferentes com ciclos de mudança diferentes.</p>
+<hr>
+<h2 id="2-modelos-de-usuário-e-requisitos">2. Modelos de Usuário e Requisitos</h2>
+<h3 id="21-descrição-dos-atores">2.1 Descrição dos Atores</h3>
+<p><strong>Tutor</strong> — Dono do pet. Cria sua conta com CPF, cadastra um ou mais animais e usa o sistema pra agendar consultas, consultar o histórico do pet (prontuário, vacinas), pagar atendimentos pelo app e receber lembretes de vacina vencendo. É o ator com menor privilégio: só enxerga os próprios pets.</p>
+<p><strong>Recepcionista</strong> — Funcionária do balcão. Faz quase tudo que o tutor faz, mas em nome dele: agenda e cancela consulta por telefone, cadastra pet quando o tutor chega sem conta, registra o pagamento presencial e visualiza a agenda do dia pra organizar a sala de espera. Não acessa o prontuário clínico em detalhe.</p>
+<p><strong>Veterinário</strong> — Profissional com CRMV ativo. Atende a consulta, preenche o prontuário (anamnese, diagnóstico, observações), aplica vacinas seguindo o protocolo da espécie, prescreve medicamentos e solicita exames. Só consegue editar prontuário das consultas que ele está atendendo no momento.</p>
+<p><strong>Administrador</strong> — Dono ou gerente da clínica. Cuida do cadastro de veterinários (admissão e desligamento), define a tabela de serviços e preços, emite relatórios financeiros mensais e gerencia permissões. É o único que pode reabrir consultas finalizadas ou estornar pagamentos. Em clínica pequena, normalmente é a mesma pessoa que toca o balcão.</p>
+<p><strong>Atores externos:</strong></p>
+<ul>
+<li><strong>Gateway de Pagamento</strong> — serviço externo (Pix e cartão) que processa transações e devolve aprovação por webhook.</li>
+<li><strong>Serviço de E-mail (SMTP)</strong> — gateway externo (ex.: SendGrid) que entrega lembretes e recibos.</li>
+</ul>
+<h3 id="22-regras-de-negócio">2.2 Regras de Negócio</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Regra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RN-01</td>
+<td>Um veterinário não pode ter duas consultas no mesmo horário. Janela mínima entre consultas: 30 minutos.</td>
+</tr>
+<tr>
+<td>RN-02</td>
+<td>Cancelamento com menos de 2 horas de antecedência gera taxa de 50% do valor da consulta.</td>
+</tr>
+<tr>
+<td>RN-03</td>
+<td>Pet deve estar vinculado a exatamente 1 tutor responsável, com CPF cadastrado.</td>
+</tr>
+<tr>
+<td>RN-04</td>
+<td>Vacina antirrábica tem reforço anual obrigatório. Sistema dispara lembrete 30 dias e 7 dias antes do vencimento.</td>
+</tr>
+<tr>
+<td>RN-05</td>
+<td>Vacinas V8/V10 seguem protocolo: 1ª dose após 45 dias de vida, reforço a cada 21 dias até 4 meses, depois anual.</td>
+</tr>
+<tr>
+<td>RN-06</td>
+<td>Prescrição de medicamento controlado exige CRMV ativo do veterinário no momento da prescrição.</td>
+</tr>
+<tr>
+<td>RN-07</td>
+<td>Consulta só passa para REALIZADA depois do prontuário preenchido (anamnese e diagnóstico no mínimo).</td>
+</tr>
+<tr>
+<td>RN-08</td>
+<td>Pagamento via Pix tem janela de 15 minutos para confirmação. Após isso, a consulta volta para AGUARDANDO_PAGAMENTO.</td>
+</tr>
+<tr>
+<td>RN-09</td>
+<td>Tutor menor de 18 anos precisa de responsável legal cadastrado (CPF e grau de parentesco).</td>
+</tr>
+<tr>
+<td>RN-10</td>
+<td>Veterinário só pode atender espécies da sua especialidade declarada, salvo override do administrador.</td>
+</tr>
+<tr>
+<td>RN-11</td>
+<td>Relatório financeiro mensal consolida pagamentos com status CONFIRMADO entre o 1º e o último dia do mês.</td>
+</tr>
+<tr>
+<td>RN-12</td>
+<td>E-mail de lembrete tenta envio até 3 vezes em caso de falha. Depois disso, é descartado e admin é notificado.</td>
+</tr>
+<tr>
+<td>RN-13</td>
+<td>Histórico do prontuário é imutável. Correções entram como nova anotação com referência à anterior.</td>
+</tr>
+<tr>
+<td>RN-14</td>
+<td>Senha mínima de 8 caracteres com hash BCrypt. Para perfis internos (recepcionista, vet, admin) expira em 90 dias.</td>
+</tr>
+<tr>
+<td>RN-15</td>
+<td>Pet inativado (óbito ou transferência) não pode ser agendado, mas o histórico permanece consultável.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-modelo-de-casos-de-uso">2.3 Modelo de Casos de Uso</h3>
+<p>O sistema tem 16 casos de uso. Os UCs marcados como &quot;include&quot; são incluídos por todos os outros que exigem usuário autenticado, evitando repetição na modelagem.</p>
+<p><strong>UC-01 — Autenticar.</strong> Incluído por todos os UCs autenticados. Verifica e-mail e senha (BCrypt), aplica RN-14 e emite JWT válido por 24 horas. Ator: Usuário genérico.</p>
+<p><strong>UC-02 — Gerenciar Perfil.</strong> Permite que qualquer usuário autenticado atualize seus dados cadastrais e troque a senha. Ator: Usuário.</p>
+<p><strong>UC-03 — Cadastrar Pet.</strong> Tutor cadastra um novo pet vinculado ao próprio CPF (RN-03). Validações de espécie, peso e data de nascimento. Ator principal: Tutor.</p>
+<p><strong>UC-04 — Agendar Consulta.</strong> Tutor (ou recepcionista em nome dele) reserva um horário com um veterinário. Inclui UC-01 e UC-16. Pré-condições: pet ativo (RN-15), vet com agenda aberta, especialidade compatível (RN-10), sem conflito de horário (RN-01).</p>
+<p><strong>UC-05 — Cancelar Consulta.</strong> Tutor, recepcionista ou admin cancela uma consulta agendada. Se for com menos de 2h de antecedência, aplica taxa de 50% (RN-02). Se já estiver paga, dispara estorno via ms-pagamento.</p>
+<p><strong>UC-06 — Reagendar Consulta.</strong> Variação do cancelamento que mantém o ID da consulta original e move pra nova data. Útil pra preservar o histórico vinculado.</p>
+<p><strong>UC-07 — Atender Consulta.</strong> Veterinário inicia o atendimento e preenche o prontuário. Inclui UC-08 (registrar prontuário). Pode estender pra UC-09 (prescrição) e UC-10 (vacina). Ao concluir, marca consulta como REALIZADA (RN-07).</p>
+<p><strong>UC-08 — Registrar Prontuário.</strong> Vet preenche anamnese, diagnóstico e observações. Imutável após gravado (RN-13). Vincula automaticamente à consulta em andamento.</p>
+<p><strong>UC-09 — Prescrever Medicamento.</strong> Vet adiciona prescrição ao prontuário com posologia e duração. Se medicamento for controlado, valida CRMV ativo (RN-06).</p>
+<p><strong>UC-10 — Aplicar Vacina.</strong> Vet registra aplicação de vacina, lote e calcula próxima dose automaticamente conforme protocolo (RN-04, RN-05). Agenda lembretes 30 e 7 dias antes do vencimento.</p>
+<p><strong>UC-11 — Pagar Consulta.</strong> Tutor (ou recepcionista) inicia pagamento via Pix ou cartão. Integra com Gateway de Pagamento externo. Pix expira em 15 minutos sem confirmação (RN-08).</p>
+<p><strong>UC-12 — Visualizar Agenda do Dia.</strong> Veterinário e recepcionista veem a lista de consultas do dia, com status (agendada, confirmada, em atendimento, realizada).</p>
+<p><strong>UC-13 — Ver Prontuário do Pet.</strong> Tutor consulta histórico do próprio pet. Veterinário consulta histórico de qualquer pet da clínica.</p>
+<p><strong>UC-14 — Gerenciar Veterinários.</strong> Administrador cadastra, ativa ou desliga veterinários. Define especialidade e carga horária.</p>
+<p><strong>UC-15 — Gerar Relatório Financeiro.</strong> Administrador gera relatório mensal consolidando pagamentos confirmados (RN-11). Exporta em PDF.</p>
+<p><strong>UC-16 — Notificar.</strong> Incluído por UC-04, UC-05, UC-10. Encapsula a lógica de envio de notificações (e-mail) com retry e descarte após 3 falhas (RN-12).</p>
+<h3 id="24-diagrama-de-casos-de-uso">2.4 Diagrama de Casos de Uso</h3>
+<blockquote>
+<p>Fonte: <a href="../Codigo/CasosDeUso/diagrama-de-caso-de-uso.puml"><code>Codigo/CasosDeUso/diagrama-de-caso-de-uso.puml</code></a>
+Imagem: <a href="../Modelagem/CasosDeUso/diagrama-de-caso-de-uso.png"><code>Modelagem/CasosDeUso/diagrama-de-caso-de-uso.png</code></a></p>
+</blockquote>
+<p>O diagrama mostra a hierarquia de atores (Usuário abstrato → Tutor, Recepcionista, Veterinário, Administrador), os 16 casos de uso e suas relações <code>&lt;&lt;include&gt;&gt;</code> e <code>&lt;&lt;extend&gt;&gt;</code>.</p>
+<hr>
+<h2 id="3-contratos-de-operação">3. Contratos de Operação</h2>
+<p>Cada contrato descreve uma operação principal do sistema, com pré e pós-condições.</p>
+<h3 id="ct-01--agendarconsulta">CT-01 — agendarConsulta</h3>
+<ul>
+<li><strong>Operação:</strong> <code>agendarConsulta(tutorId: Long, petId: Long, vetId: Long, dataHora: DateTime, motivo: String): ConsultaDTO</code></li>
+<li><strong>UC:</strong> UC-04</li>
+<li><strong>Pré-condições:</strong> tutor autenticado; pet pertence ao tutor e está ATIVO; vet está ATIVO; dataHora futura; especialidade compatível com espécie (RN-10).</li>
+<li><strong>Pós-condições:</strong> consulta persistida com status AGENDADA; evento <code>ConsultaAgendadaEvent</code> publicado no RabbitMQ; lembrete agendado pra 24h antes.</li>
+</ul>
+<h3 id="ct-02--cancelarconsulta">CT-02 — cancelarConsulta</h3>
+<ul>
+<li><strong>Operação:</strong> <code>cancelarConsulta(consultaId: Long, motivo: String, solicitanteId: Long): ResultadoCancelamento</code></li>
+<li><strong>UC:</strong> UC-05</li>
+<li><strong>Pré-condições:</strong> consulta existe e está em AGENDADA ou CONFIRMADA; solicitante é o tutor dono, recepcionista ou admin; dataHora futura.</li>
+<li><strong>Pós-condições:</strong> status atualizado para CANCELADA; se antecedência &lt; 2h, taxa de 50% aplicada (RN-02); se consulta paga, estorno disparado; tutor notificado.</li>
+</ul>
+<h3 id="ct-03--registrarprontuario">CT-03 — registrarProntuario</h3>
+<ul>
+<li><strong>Operação:</strong> <code>registrarProntuario(consultaId: Long, vetId: Long, anamnese: String, diagnostico: String, obs: String): ProntuarioDTO</code></li>
+<li><strong>UC:</strong> UC-08</li>
+<li><strong>Pré-condições:</strong> consulta em EM_ATENDIMENTO; vetId é o atendente; anamnese e diagnóstico não vazios.</li>
+<li><strong>Pós-condições:</strong> prontuário criado e imutável (RN-13); consulta passa pra REALIZADA; cobrança gerada.</li>
+</ul>
+<h3 id="ct-04--prescrevermedicamento">CT-04 — prescreverMedicamento</h3>
+<ul>
+<li><strong>Operação:</strong> <code>prescreverMedicamento(prontuarioId: Long, vetId: Long, medicamentoId: Long, posologia: String, duracaoDias: int): PrescricaoDTO</code></li>
+<li><strong>UC:</strong> UC-09</li>
+<li><strong>Pré-condições:</strong> prontuário existe; vet com CRMV ativo (RN-06); medicamento cadastrado; duração &gt; 0.</li>
+<li><strong>Pós-condições:</strong> prescrição vinculada ao prontuário; se controlado, registro em log de auditoria.</li>
+</ul>
+<h3 id="ct-05--aplicarvacina">CT-05 — aplicarVacina</h3>
+<ul>
+<li><strong>Operação:</strong> <code>aplicarVacina(prontuarioId: Long, vetId: Long, vacinaTipo: TipoVacina, lote: String): AplicacaoVacinaDTO</code></li>
+<li><strong>UC:</strong> UC-10</li>
+<li><strong>Pré-condições:</strong> prontuário existe; vacina compatível com espécie e idade do pet; lote informado.</li>
+<li><strong>Pós-condições:</strong> aplicação registrada; <code>proximaDose</code> calculada por protocolo (RN-04, RN-05); lembrete de reforço agendado.</li>
+</ul>
+<h3 id="ct-06--pagarconsulta">CT-06 — pagarConsulta</h3>
+<ul>
+<li><strong>Operação:</strong> <code>pagarConsulta(consultaId: Long, metodo: MetodoPagamento, valor: BigDecimal): ResultadoPagamento</code></li>
+<li><strong>UC:</strong> UC-11</li>
+<li><strong>Pré-condições:</strong> consulta REALIZADA; pagamento ainda não confirmado; valor confere com o valor da consulta.</li>
+<li><strong>Pós-condições:</strong> cobrança gerada no gateway; se Pix expirar em 15 min (RN-08), status volta pra EXPIRADO; recibo enviado por e-mail em caso de aprovação.</li>
+</ul>
+<h3 id="ct-07--cadastrarpet">CT-07 — cadastrarPet</h3>
+<ul>
+<li><strong>Operação:</strong> <code>cadastrarPet(tutorId: Long, dados: PetData): PetDTO</code></li>
+<li><strong>UC:</strong> UC-03</li>
+<li><strong>Pré-condições:</strong> tutor autenticado e maior de 18 (RN-09); CPF válido; espécie em lista controlada; data de nascimento não futura.</li>
+<li><strong>Pós-condições:</strong> pet criado com status ATIVO.</li>
+</ul>
+<h3 id="ct-08--autenticar">CT-08 — autenticar</h3>
+<ul>
+<li><strong>Operação:</strong> <code>autenticar(email: String, senha: String): TokenJWT</code></li>
+<li><strong>UC:</strong> UC-01</li>
+<li><strong>Pré-condições:</strong> e-mail cadastrado; conta não BLOQUEADA; senha não expirada (RN-14).</li>
+<li><strong>Pós-condições:</strong> hash BCrypt conferido; JWT emitido (exp 24h); login registrado em auditoria. Após 5 falhas seguidas, conta bloqueia por 15 min.</li>
+</ul>
+<h3 id="ct-09--gerarrelatoriofinanceiro">CT-09 — gerarRelatorioFinanceiro</h3>
+<ul>
+<li><strong>Operação:</strong> <code>gerarRelatorioFinanceiro(adminId: Long, mesRef: YearMonth, filtros: Map): RelatorioMensalDTO</code></li>
+<li><strong>UC:</strong> UC-15</li>
+<li><strong>Pré-condições:</strong> solicitante é Administrador; mês de referência ≤ mês atual.</li>
+<li><strong>Pós-condições:</strong> dados agregados de pagamentos CONFIRMADO no período (RN-11); PDF gerado; total bruto, por método e por veterinário disponíveis.</li>
+</ul>
+<h3 id="ct-10--enviarlembrete">CT-10 — enviarLembrete</h3>
+<ul>
+<li><strong>Operação:</strong> <code>enviarLembrete(notificacaoId: Long): ResultadoEnvio</code></li>
+<li><strong>UC:</strong> UC-16</li>
+<li><strong>Pré-condições:</strong> notificação com status PENDENTE; canal definido; destinatário com e-mail válido.</li>
+<li><strong>Pós-condições:</strong> e-mail enviado via SMTP; status passa pra ENVIADA ou FALHA; após 3 tentativas (RN-12), notificação marcada como DESCARTADA e admin alertado.</li>
+</ul>
+<hr>
+<h2 id="4-modelos-de-projeto">4. Modelos de Projeto</h2>
+<h3 id="41-arquitetura">4.1 Arquitetura</h3>
+<p>O sistema segue arquitetura de <strong>microsserviços</strong> com seis serviços, cada um com seu próprio banco PostgreSQL. A comunicação entre serviços é majoritariamente assíncrona via RabbitMQ — eventos de domínio são publicados quando algo relevante acontece (consulta agendada, vacina aplicada, pagamento confirmado) e consumidos por quem precisar reagir.</p>
+<table>
+<thead>
+<tr>
+<th>Serviço</th>
+<th>Responsabilidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ms-usuarios</td>
+<td>Autenticação JWT, CRUD de perfis (tutor/recepcionista/vet/admin).</td>
+</tr>
+<tr>
+<td>ms-agendamento</td>
+<td>Consultas, agenda dos vets, regras de conflito de horário.</td>
+</tr>
+<tr>
+<td>ms-prontuario</td>
+<td>Anamnese, diagnóstico, vacinas, prescrições. Upload de exames pra S3.</td>
+</tr>
+<tr>
+<td>ms-pagamento</td>
+<td>Integração com gateway Pix/cartão, webhooks, estorno.</td>
+</tr>
+<tr>
+<td>ms-notificacao</td>
+<td>Worker que consome a fila e dispara e-mail. Scheduler de lembretes.</td>
+</tr>
+<tr>
+<td>ms-relatorios</td>
+<td>Leitura cruzada de pagamento e agendamento para relatórios.</td>
+</tr>
+</tbody>
+</table>
+<p>Por dentro de cada serviço, mantive a estrutura Spring Boot em camadas:</p>
+<ul>
+<li><strong>Controller</strong> recebe a requisição HTTP, valida e devolve o DTO.</li>
+<li><strong>Service</strong> concentra a regra de negócio (ex.: &quot;não dá pra agendar dois pets no mesmo horário pro mesmo vet&quot;).</li>
+<li><strong>Repository</strong> conversa com o banco via Spring Data JPA.</li>
+<li><strong>DTO</strong> isola a entidade do contrato da API.</li>
+</ul>
+<p>Na frente fica um <strong>API Gateway</strong> que valida o JWT na borda e roteia pros serviços via Application Load Balancer. Front-end React (SPA) e React Native (mobile) entram por CloudFront → API Gateway.</p>
+<p><strong>Padrões de projeto adotados:</strong> Repository (acesso a dados), Service Layer (regras de negócio), DTO (transferência), Event-Driven (RabbitMQ desacopla os serviços), Strategy (cálculo de próxima dose de vacina por protocolo), Factory (criação de notificações por canal).</p>
+<p><strong>Decisões importantes:</strong></p>
+<ol>
+<li><strong>Microsserviços com banco por serviço.</strong> Cada ms tem seu próprio banco, sem joins entre eles. Quando ms-relatorios precisa cruzar dados de pagamento e agendamento, lê dos dois bancos (read-only) ou consome eventos pra construir uma view materializada.</li>
+<li><strong>Comunicação assíncrona como default.</strong> Notificação e atualização de relatório vão por fila. REST síncrono só nos fluxos onde a resposta é parte da UX (agendar, pagar, atender).</li>
+<li><strong>JWT stateless.</strong> Sem sessão no servidor. Token validado no API Gateway e propagado.</li>
+<li><strong>Banco relacional (PostgreSQL).</strong> Domínio tem transações ACID (pagamento, agendamento), então NoSQL não compensa.</li>
+</ol>
+<p><strong>Trade-offs assumidos:</strong></p>
+<ul>
+<li>Microsserviços trazem complexidade operacional (orquestração, observabilidade, deploy). Pra uma clínica única isso é exagero. A escolha é justificada pelo desenho voltado pra rede de clínicas.</li>
+<li>Consistência eventual entre serviços via fila — relatórios podem demorar alguns segundos pra refletir um pagamento recém-confirmado.</li>
+</ul>
+<h3 id="42-componentes-e-implantação">4.2 Componentes e Implantação</h3>
+<blockquote>
+<p>Fonte: <a href="../Codigo/Componentes/diagrama-de-componentes-e-implantacao.puml"><code>Codigo/Componentes/diagrama-de-componentes-e-implantacao.puml</code></a></p>
+</blockquote>
+<p>O diagrama mostra a separação física: clientes (Web e Mobile) → CloudFront → API Gateway → ALB → cluster Docker/ECS com os seis microsserviços e seus bancos. RabbitMQ orquestra a comunicação assíncrona. Externos: gateway de pagamento, SMTP e S3 (anexos de exame).</p>
+<h3 id="43-diagrama-de-classes">4.3 Diagrama de Classes</h3>
+<blockquote>
+<p>Fonte: <a href="../Codigo/Classes/diagrama-de-classes.puml"><code>Codigo/Classes/diagrama-de-classes.puml</code></a></p>
+</blockquote>
+<p>O modelo de domínio gira em torno da hierarquia <code>Usuario</code> (abstrata) → Tutor, Recepcionista, Veterinario, Administrador. A interface <code>Autenticavel</code> define o contrato pra qualquer entidade autenticável.</p>
+<p>Entidades principais: <code>Pet</code>, <code>Consulta</code> (com enum <code>StatusConsulta</code> cobrindo todo o ciclo de vida), <code>Prontuario</code>, <code>Vacina</code> e a classe associativa <code>AplicacaoVacina</code> (entre Pet, Vacina e Prontuário, carregando lote e próxima dose), <code>Prescricao</code>, <code>Medicamento</code>, <code>Pagamento</code>, <code>Notificacao</code>.</p>
+<p>Enums modelam valores fixos: <code>StatusConsulta</code>, <code>TipoConsulta</code>, <code>EspecieAnimal</code>, <code>Especialidade</code>, <code>TipoVacina</code>, <code>MetodoPagamento</code>, <code>StatusPagamento</code>, <code>CanalNotificacao</code>, <code>StatusNotificacao</code>, <code>StatusPet</code>, <code>StatusUsuario</code>.</p>
+<h3 id="44-diagramas-de-sequência">4.4 Diagramas de Sequência</h3>
+<p>Sete diagramas de sequência cobrem os fluxos principais. Cada um mostra interação entre cliente, API Gateway, microsserviço responsável, repositórios e (quando aplicável) RabbitMQ e serviços externos. Os fluxos alternativos (alt/opt) representam regras de negócio e exceções.</p>
+<table>
+<thead>
+<tr>
+<th>UC</th>
+<th>Cenário</th>
+<th>Arquivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UC-04</td>
+<td>Agendar Consulta</td>
+<td><a href="../Codigo/Sequencia/UC-04-agendar-consulta.puml"><code>UC-04-agendar-consulta.puml</code></a></td>
+</tr>
+<tr>
+<td>UC-05</td>
+<td>Cancelar Consulta</td>
+<td><a href="../Codigo/Sequencia/UC-05-cancelar-consulta.puml"><code>UC-05-cancelar-consulta.puml</code></a></td>
+</tr>
+<tr>
+<td>UC-07</td>
+<td>Atender Consulta e Prontuário</td>
+<td><a href="../Codigo/Sequencia/UC-07-atender-consulta.puml"><code>UC-07-atender-consulta.puml</code></a></td>
+</tr>
+<tr>
+<td>UC-10</td>
+<td>Aplicar Vacina com Reforço</td>
+<td><a href="../Codigo/Sequencia/UC-10-aplicar-vacina.puml"><code>UC-10-aplicar-vacina.puml</code></a></td>
+</tr>
+<tr>
+<td>UC-11</td>
+<td>Pagar Consulta via Pix</td>
+<td><a href="../Codigo/Sequencia/UC-11-pagar-consulta.puml"><code>UC-11-pagar-consulta.puml</code></a></td>
+</tr>
+<tr>
+<td>UC-15</td>
+<td>Gerar Relatório Financeiro</td>
+<td><a href="../Codigo/Sequencia/UC-15-gerar-relatorio.puml"><code>UC-15-gerar-relatorio.puml</code></a></td>
+</tr>
+<tr>
+<td>UC-16</td>
+<td>Job de Envio de Lembrete</td>
+<td><a href="../Codigo/Sequencia/UC-16-enviar-lembrete.puml"><code>UC-16-enviar-lembrete.puml</code></a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="45-diagramas-de-comunicação">4.5 Diagramas de Comunicação</h3>
+<p>Dois diagramas de comunicação, equivalentes em informação às sequências correspondentes mas com ênfase nos relacionamentos estruturais entre objetos:</p>
+<ul>
+<li><a href="../Codigo/Comunicacao/comunicacao-UC04-agendar-consulta.puml">Comunicação UC-04 — Agendar Consulta</a></li>
+<li><a href="../Codigo/Comunicacao/comunicacao-UC10-aplicar-vacina.puml">Comunicação UC-10 — Aplicar Vacina</a></li>
+</ul>
+<h3 id="46-diagramas-de-estado">4.6 Diagramas de Estado</h3>
+<p>Quatro entidades têm ciclo de vida complexo o suficiente pra justificar diagrama de estados:</p>
+<ul>
+<li><strong>Consulta</strong> — do agendamento até o pagamento, passando por confirmação, atendimento, realização. Inclui transições de cancelamento e falta. <a href="../Codigo/Estado/diagrama-de-estado-consulta.puml"><code>diagrama-de-estado-consulta.puml</code></a></li>
+<li><strong>Vacinação</strong> — protocolo cíclico: pendente → aplicada → vencendo → vencida → reforço aplicado. Com guards de RN-04 e RN-05. <a href="../Codigo/Estado/diagrama-de-estado-vacinacao.puml"><code>diagrama-de-estado-vacinacao.puml</code></a></li>
+<li><strong>Pagamento</strong> — pendente → processando → aprovado/recusado/expirado → confirmado/estornado. Com timeout Pix da RN-08. <a href="../Codigo/Estado/diagrama-de-estado-pagamento.puml"><code>diagrama-de-estado-pagamento.puml</code></a></li>
+<li><strong>Pet</strong> — ativo → inativo transferido / óbito. Preserva histórico mesmo após inativação (RN-15). <a href="../Codigo/Estado/diagrama-de-estado-pet.puml"><code>diagrama-de-estado-pet.puml</code></a></li>
+</ul>
+<hr>
+<h2 id="5-modelos-de-dados">5. Modelos de Dados</h2>
+<h3 id="51-tecnologia-de-persistência">5.1 Tecnologia de Persistência</h3>
+<p>Cada microsserviço tem seu próprio banco <strong>PostgreSQL 16</strong>, sem compartilhamento direto. Acesso via Spring Data JPA + Hibernate.</p>
+<p>A herança da hierarquia <code>Usuario</code> é tratada por <strong>tabelas separadas compartilhando chave primária</strong> (table-per-subclass): tabela <code>usuarios</code> é a base; <code>tutores</code>, <code>recepcionistas</code>, <code>veterinarios</code> e <code>administradores</code> estendem com <code>id</code> referenciando <code>usuarios.id</code>. Permite consultas polimórficas via JOIN e mantém integridade.</p>
+<p>Valores enumerados (status, tipos, métodos) são armazenados como <code>varchar</code> pra facilitar leitura em SQL e relatórios, ao invés de inteiros.</p>
+<h3 id="52-diagrama-entidade-relacionamento">5.2 Diagrama Entidade-Relacionamento</h3>
+<blockquote>
+<p>Fonte: <a href="../Codigo/ER/diagrama-er-vetcareplus.puml"><code>Codigo/ER/diagrama-er-vetcareplus.puml</code></a></p>
+</blockquote>
+<p>O modelo conta com 14 tabelas distribuídas entre os bancos dos microsserviços:</p>
+<table>
+<thead>
+<tr>
+<th>Microsserviço</th>
+<th>Tabelas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ms-usuarios</td>
+<td><code>usuarios</code>, <code>tutores</code>, <code>recepcionistas</code>, <code>veterinarios</code>, <code>administradores</code></td>
+</tr>
+<tr>
+<td>ms-agendamento</td>
+<td><code>consultas</code></td>
+</tr>
+<tr>
+<td>ms-prontuario</td>
+<td><code>prontuarios</code>, <code>vacinas</code>, <code>aplicacoes_vacina</code>, <code>medicamentos</code>, <code>prescricoes</code>, <code>pets</code></td>
+</tr>
+<tr>
+<td>ms-pagamento</td>
+<td><code>pagamentos</code></td>
+</tr>
+<tr>
+<td>ms-notificacao</td>
+<td><code>notificacoes</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-índices-importantes">5.3 Índices Importantes</h3>
+<table>
+<thead>
+<tr>
+<th>Tabela</th>
+<th>Índice</th>
+<th>Justificativa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>usuarios</td>
+<td><code>email</code> (unique)</td>
+<td>Login</td>
+</tr>
+<tr>
+<td>veterinarios</td>
+<td><code>crmv</code> (unique)</td>
+<td>Identificação profissional</td>
+</tr>
+<tr>
+<td>consultas</td>
+<td><code>(veterinario_id, data_hora)</code></td>
+<td>Checagem de conflito (RN-01)</td>
+</tr>
+<tr>
+<td>consultas</td>
+<td><code>status</code></td>
+<td>Filtro de agenda do dia</td>
+</tr>
+<tr>
+<td>pagamentos</td>
+<td><code>(status, pago_em)</code></td>
+<td>Relatório financeiro (RN-11)</td>
+</tr>
+<tr>
+<td>aplicacoes_vacina</td>
+<td><code>proxima_dose</code></td>
+<td>Job de lembrete (RN-04)</td>
+</tr>
+<tr>
+<td>notificacoes</td>
+<td><code>(status, data_envio)</code></td>
+<td>Job de envio (RN-12)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="6-escopo-do-mvp-e-versões-futuras">6. Escopo do MVP e Versões Futuras</h2>
+<h3 id="mvp-v10--entrega">MVP (v1.0 — entrega)</h3>
+<ul>
+<li>Autenticação JWT com 4 perfis.</li>
+<li>CRUD de tutor e pet.</li>
+<li>Agendamento, cancelamento, reagendamento e atendimento de consulta.</li>
+<li>Prontuário com anamnese, diagnóstico, vacinas e prescrições.</li>
+<li>Pagamento por Pix e cartão via gateway externo.</li>
+<li>Lembrete por e-mail (consulta 24h antes; vacina 30 e 7 dias antes do vencimento).</li>
+<li>Relatório financeiro mensal.</li>
+</ul>
+<h3 id="v11--próximo-ciclo">v1.1 — Próximo ciclo</h3>
+<ul>
+<li>Upload de exames complementares (PDF, imagem) pra S3.</li>
+<li>App mobile React Native para o tutor (visualizar agenda, prontuário, pagamento).</li>
+<li>Notificação push.</li>
+</ul>
+<h3 id="v20--visão-de-longo-prazo">v2.0 — Visão de longo prazo</h3>
+<ul>
+<li>Notificação por WhatsApp como canal alternativo (RN-12 expandida).</li>
+<li>Telemedicina veterinária (videoconsulta integrada).</li>
+<li>Integração com farmácia veterinária parceira (entrega de medicação).</li>
+<li>Programa de fidelidade.</li>
+</ul>
+<h3 id="fora-de-escopo-decisão-consciente">Fora de escopo (decisão consciente)</h3>
+<ul>
+<li><strong>Estoque de medicamentos.</strong> Clínica pequena terceiriza a venda — não vale o esforço de modelar.</li>
+<li><strong>Internação e centro cirúrgico.</strong> Domínio diferente, com regras próprias (anestesia, escala 24h). Mereceria um módulo separado.</li>
+<li><strong>Faturamento por convênio pet.</strong> Mercado ainda imaturo no perfil de cliente-alvo.</li>
+</ul>
+<hr>
+<p><em>Fim do documento.</em></p>
+
+</body>
+</html>

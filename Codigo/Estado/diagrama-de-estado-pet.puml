@@ -1,0 +1,25 @@
+@startuml estado-pet
+title VetCare+ - Diagrama de Estados: Pet
+
+[*] --> ATIVO : tutor cadastra pet\n[CPF do tutor valido] (RN-03)
+
+ATIVO --> ATIVO : nova consulta / vacina / prontuario
+
+ATIVO --> INATIVO_TRANSFERIDO : tutor transfere\nou cancela cadastro\n/ historico preservado (RN-15)
+
+ATIVO --> OBITO : vet declara obito\n/ encerrar lembretes ativos
+
+INATIVO_TRANSFERIDO --> ATIVO : tutor reativa\n[dentro de 90 dias]
+INATIVO_TRANSFERIDO --> [*] : prazo de reativacao expirou
+
+OBITO --> [*]
+
+note right of INATIVO_TRANSFERIDO
+  Nao pode agendar
+  novas consultas,
+  mas prontuario e
+  vacinas continuam
+  consultaveis.
+end note
+
+@enduml

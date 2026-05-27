@@ -1,0 +1,36 @@
+@startuml estado-pagamento
+title VetCare+ - Diagrama de Estados: Pagamento
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam linetype polyline
+
+[*] --> PENDENTE : pagamento criado
+
+PENDENTE --> PROCESSANDO : enviar para gateway\n/ obter txid
+
+PROCESSANDO --> APROVADO : webhook gateway\n[status=APROVADO]
+PROCESSANDO --> RECUSADO : webhook gateway\n[status=RECUSADO]
+PROCESSANDO --> EXPIRADO : Pix sem confirmacao\n[tempo > 15min] (RN-08)
+
+APROVADO --> CONFIRMADO : registrar PAGO\n/ emitir recibo
+
+CONFIRMADO --> ESTORNADO : admin estorna\n/ devolver valor
+
+RECUSADO --> [*]
+EXPIRADO --> [*] : consulta volta\npara AGUARDANDO_PAGAMENTO
+CONFIRMADO --> [*]
+ESTORNADO --> [*]
+
+note right of PROCESSANDO
+  Pix: timeout 15 min
+  Cartao: timeout 30 s
+end note
+
+note right of CONFIRMADO
+  Gera entrada no
+  relatorio financeiro (RN-11)
+end note
+
+@enduml

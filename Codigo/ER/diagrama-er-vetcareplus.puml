@@ -1,0 +1,197 @@
+@startuml DER-vetcareplus
+title VetCare+ - Diagrama Entidade-Relacionamento
+
+!define PK <b><color:#B22222>PK</color></b>
+!define FK <color:#1E90FF>FK</color>
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 11
+skinparam linetype ortho
+hide circle
+
+package "ms-usuarios" <<Rectangle>> {
+  entity usuarios {
+    PK id : bigint
+    --
+    nome : varchar(120)
+    email : varchar(150) <<unique>>
+    senha_hash : varchar(255)
+    telefone : varchar(20)
+    papel : varchar(20)
+    status : varchar(20)
+    criado_em : timestamp
+  }
+
+  entity tutores {
+    PK FK id : bigint
+    --
+    cpf : varchar(14) <<unique>>
+    data_nascimento : date
+    endereco : varchar(200)
+  }
+
+  entity recepcionistas {
+    PK FK id : bigint
+    --
+    matricula : varchar(20)
+    turno : varchar(20)
+  }
+
+  entity veterinarios {
+    PK FK id : bigint
+    --
+    crmv : varchar(20) <<unique>>
+    especialidade : varchar(40)
+    carga_horaria_semanal : int
+  }
+
+  entity administradores {
+    PK FK id : bigint
+    --
+    nivel_acesso : varchar(20)
+  }
+}
+
+package "ms-agendamento" <<Rectangle>> {
+  entity pets {
+    PK id : bigint
+    --
+    FK tutor_id : bigint
+    nome : varchar(80)
+    especie : varchar(20)
+    raca : varchar(60)
+    data_nascimento : date
+    peso : decimal(5,2)
+    sexo : char(1)
+    status : varchar(30)
+  }
+
+  entity consultas {
+    PK id : bigint
+    --
+    FK pet_id : bigint
+    FK veterinario_id : bigint
+    FK recepcionista_id : bigint
+    data_hora : timestamp
+    status : varchar(30)
+    tipo : varchar(20)
+    motivo : text
+    valor : decimal(10,2)
+    taxa_cancelamento : decimal(10,2)
+  }
+}
+
+package "ms-prontuario" <<Rectangle>> {
+  entity prontuarios {
+    PK id : bigint
+    --
+    FK consulta_id : bigint <<unique>>
+    anamnese : text
+    diagnostico : text
+    observacoes : text
+    criado_em : timestamp
+  }
+
+  entity vacinas {
+    PK id : bigint
+    --
+    nome : varchar(80)
+    tipo : varchar(30)
+    intervalo_reforco_dias : int
+  }
+
+  entity aplicacoes_vacina {
+    PK id : bigint
+    --
+    FK prontuario_id : bigint
+    FK vacina_id : bigint
+    FK pet_id : bigint
+    data_aplicacao : date
+    lote : varchar(40)
+    proxima_dose : date
+  }
+
+  entity medicamentos {
+    PK id : bigint
+    --
+    nome : varchar(120)
+    principio_ativo : varchar(120)
+    controlado : boolean
+  }
+
+  entity prescricoes {
+    PK id : bigint
+    --
+    FK prontuario_id : bigint
+    FK medicamento_id : bigint
+    posologia : text
+    duracao_dias : int
+    data_emissao : date
+  }
+}
+
+package "ms-pagamento" <<Rectangle>> {
+  entity pagamentos {
+    PK id : bigint
+    --
+    FK consulta_id : bigint <<unique>>
+    valor : decimal(10,2)
+    metodo : varchar(20)
+    status : varchar(20)
+    txid : varchar(60)
+    pago_em : timestamp
+    tentativas : int
+  }
+}
+
+package "ms-notificacao" <<Rectangle>> {
+  entity notificacoes {
+    PK id : bigint
+    --
+    FK usuario_id : bigint
+    canal : varchar(10)
+    assunto : varchar(120)
+    mensagem : text
+    status : varchar(20)
+    data_envio : timestamp
+    enviada_em : timestamp
+    tentativas : int
+  }
+}
+
+usuarios ||--o| tutores
+usuarios ||--o| recepcionistas
+usuarios ||--o| veterinarios
+usuarios ||--o| administradores
+
+tutores ||--o{ pets
+pets ||--o{ consultas
+veterinarios ||--o{ consultas
+recepcionistas ||--o{ consultas
+
+consultas ||--o| prontuarios
+consultas ||--o| pagamentos
+
+prontuarios ||--o{ prescricoes
+prontuarios ||--o{ aplicacoes_vacina
+medicamentos ||--o{ prescricoes
+vacinas ||--o{ aplicacoes_vacina
+pets ||--o{ aplicacoes_vacina
+
+usuarios ||--o{ notificacoes
+
+note bottom of usuarios
+  Heranca por tabelas separadas:
+  tutores/recepcionistas/veterinarios/admins
+  compartilham PK com usuarios.
+end note
+
+note right of consultas
+  Indices: (veterinario_id, data_hora)
+  para checagem de conflito (RN-01).
+  FKs entre microsservicos representam
+  referencias logicas (nao FK fisica).
+end note
+
+@enduml

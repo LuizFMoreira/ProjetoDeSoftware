@@ -91,30 +91,51 @@ A stack é parecida com a que vimos em sala. Escolhi porque já tinha familiarid
 
 ## Arquitetura
 
-Optei por uma arquitetura em camadas clássica (MVC + Service + Repository), porque é o padrão que o Spring Boot já incentiva e fica fácil de organizar:
+Modelei o VetCare+ como uma aplicação de **microsserviços**. Cada serviço tem seu próprio banco, expõe REST e se comunica de forma assíncrona via RabbitMQ pra eventos de domínio (consulta agendada, vacina aplicada, pagamento confirmado).
 
-- **Controller** recebe a requisição HTTP, valida e devolve o DTO.
-- **Service** concentra a regra de negócio (ex.: "não dá pra agendar dois pets no mesmo horário pro mesmo vet").
-- **Repository** conversa com o banco via Spring Data JPA.
-- **DTO** isola a entidade do contrato da API — entidade não vaza pro cliente.
-- **Security** fica num pacote separado, cuidando do JWT e dos filtros.
+São seis serviços:
 
-O front é uma SPA separada, consumindo a API por REST. Nginx fica na frente como proxy reverso e serve os arquivos estáticos do build do Vite.
+- **ms-usuarios** — autenticação JWT, CRUD de tutor/recepcionista/vet/admin.
+- **ms-agendamento** — consultas, agenda dos vets, regras de conflito.
+- **ms-prontuario** — anamnese, diagnóstico, vacinas, prescrições. Upload de exames pra S3.
+- **ms-pagamento** — integração com gateway Pix/cartão, webhooks, estorno.
+- **ms-notificacao** — worker que consome a fila e dispara e-mail via SMTP. Tem também um scheduler pros lembretes agendados (vacina vencendo, consulta de amanhã).
+- **ms-relatorios** — leitura cruzada de pagamento e agendamento pros relatórios financeiros.
 
-Pra fazer login eu uso JWT stateless. Cada request leva o token no header e o filtro do Spring Security valida antes de chegar no controller.
+Na frente fica um API Gateway que faz autenticação na borda e roteamento pros serviços. Um ALB distribui carga horizontalmente quando algum serviço precisa escalar.
 
-Trade-off que assumi: como é uma clínica pequena, monolito modular dá conta. Microserviço aqui seria over-engineering.
+Por dentro de cada serviço eu mantive a estrutura em camadas (Controller → Service → Repository → DTO) que o Spring já incentiva. JWT é stateless — o filtro valida o token no API Gateway antes de chegar nos serviços.
+
+**Por que microsserviços numa clínica?** Honestamente, pra uma clínica pequena isso é over-engineering — um monolito modular resolveria. Escolhi essa arquitetura aqui pra mostrar o desenho de um sistema que **escalaria** pra uma rede de clínicas (Petz, Cobasi e afins têm centenas de unidades). Os limites estão definidos por contexto de negócio: agendamento, prontuário clínico e pagamento são domínios diferentes, com times diferentes e ciclos de mudança diferentes — daí faz sentido separar.
 
 ### Diagramas
 
-Os diagramas em PlantUML estão na pasta [docs/diagrams/](docs/diagrams/):
+Os fontes em PlantUML ficam em [Codigo/](Codigo/), organizados por tipo. As imagens renderizadas (PNG) ficam em [Modelagem/](Modelagem/). A documentação completa em PDF está em [Documentacao/](Documentacao/).
 
-| Diagrama | Arquivo |
-|---|---|
-| Casos de Uso | [01-casos-de-uso.puml](docs/diagrams/01-casos-de-uso.puml) |
-| Classes (domínio) | [02-classes.puml](docs/diagrams/02-classes.puml) |
-| Sequência (agendar consulta) | [03-sequencia-agendamento-consulta.puml](docs/diagrams/03-sequencia-agendamento-consulta.puml) |
-| Componentes / Arquitetura | [04-componentes-arquitetura.puml](docs/diagrams/04-componentes-arquitetura.puml) |
+**Casos de Uso e Classes**
+- [Casos de Uso](Codigo/CasosDeUso/diagrama-de-caso-de-uso.puml) — 16 UCs cobrindo os 4 perfis + atores externos.
+- [Classes](Codigo/Classes/diagrama-de-classes.puml) — entidades de domínio, enums, interface `Autenticavel`.
+
+**Sequência** (1 por caso de uso principal)
+- [UC-04 Agendar Consulta](Codigo/Sequencia/UC-04-agendar-consulta.puml)
+- [UC-05 Cancelar Consulta](Codigo/Sequencia/UC-05-cancelar-consulta.puml)
+- [UC-07 Atender Consulta](Codigo/Sequencia/UC-07-atender-consulta.puml)
+- [UC-10 Aplicar Vacina](Codigo/Sequencia/UC-10-aplicar-vacina.puml)
+- [UC-11 Pagar Consulta (Pix)](Codigo/Sequencia/UC-11-pagar-consulta.puml)
+- [UC-15 Gerar Relatório Financeiro](Codigo/Sequencia/UC-15-gerar-relatorio.puml)
+- [UC-16 Enviar Lembrete (job)](Codigo/Sequencia/UC-16-enviar-lembrete.puml)
+
+**Estados** (ciclo de vida das entidades principais)
+- [Consulta](Codigo/Estado/diagrama-de-estado-consulta.puml)
+- [Vacinação](Codigo/Estado/diagrama-de-estado-vacinacao.puml)
+- [Pagamento](Codigo/Estado/diagrama-de-estado-pagamento.puml)
+- [Pet](Codigo/Estado/diagrama-de-estado-pet.puml)
+
+**Comunicação, Componentes e Dados**
+- [Componentes e Implantação](Codigo/Componentes/diagrama-de-componentes-e-implantacao.puml)
+- [Comunicação — UC-04](Codigo/Comunicacao/comunicacao-UC04-agendar-consulta.puml)
+- [Comunicação — UC-10](Codigo/Comunicacao/comunicacao-UC10-aplicar-vacina.puml)
+- [Modelo Entidade-Relacionamento](Codigo/ER/diagrama-er-vetcareplus.puml)
 
 Pra abrir, dá pra usar a extensão PlantUML do VS Code (`Alt+D` renderiza ao lado) ou colar no <https://www.plantuml.com/plantuml/uml/>.
 

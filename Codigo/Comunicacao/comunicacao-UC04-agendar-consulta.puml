@@ -1,0 +1,40 @@
+@startuml comunicacao-UC04
+title VetCare+ - Diagrama de Comunicacao UC-04: Agendar Consulta
+
+object "Tutor" as Tutor <<actor>>
+object "SPA React" as UI
+object "AuthFilter" as Auth
+object "ConsultaController" as Ctrl
+object "ConsultaService" as Svc
+object "VeterinarioRepo" as VetRepo
+object "ConsultaRepo" as ConsRepo
+object "RabbitMQ" as MQ
+object "NotificacaoWorker" as Notif
+
+Tutor --> UI : 1: preencher e enviar
+UI --> Auth : 2: POST /api/consultas (JWT)
+Auth --> Ctrl : 3: validarToken e repassar
+Ctrl --> Svc : 4: agendar(dto)
+Svc --> VetRepo : 5: buscarPorId(vetId)
+VetRepo --> Svc : 5.1: Veterinario
+Svc --> ConsRepo : 6: existeConflito(vetId, dataHora)
+ConsRepo --> Svc : 6.1: false
+Svc --> ConsRepo : 7: salvar(Consulta)
+ConsRepo --> Svc : 7.1: consulta(id)
+Svc --> MQ : 8: publicar(ConsultaAgendadaEvent)
+MQ --> Notif : 9: consumir evento
+Notif --> Notif : 9.1: enfileirar lembrete 24h
+Svc --> Ctrl : 10: ConsultaDTO
+Ctrl --> UI : 11: 201 Created
+UI --> Tutor : 12: confirmacao na tela
+
+note bottom
+  Fluxo resumido:
+  1-3. Tutor envia, sistema autentica.
+  4-6. Controller delega; service valida conflito (RN-01).
+  7-8. Persiste consulta e publica evento de dominio.
+  9. Worker assincrono agenda lembrete.
+  10-12. Resposta volta ao tutor.
+end note
+
+@enduml

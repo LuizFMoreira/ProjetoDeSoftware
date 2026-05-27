@@ -1,0 +1,36 @@
+@startuml comunicacao-UC10
+title VetCare+ - Diagrama de Comunicacao UC-10: Aplicar Vacina
+
+object "Veterinario" as Veterinario <<actor>>
+object "SPA React" as UI
+object "VacinaController" as Ctrl
+object "VacinaService" as Svc
+object "ProtocoloVacinalService" as Prot
+object "VacinaRepo" as Repo
+object "RabbitMQ" as MQ
+object "AgendadorLembretes" as Agenda
+
+Veterinario --> UI : 1: selecionar pet e vacina
+UI --> Ctrl : 2: POST /vacinas (petId, tipo, lote)
+Ctrl --> Svc : 3: aplicar(petId, vetId, tipo, lote)
+Svc --> Repo : 4: buscarPet(petId)
+Repo --> Svc : 4.1: Pet
+Svc --> Prot : 5: protocoloPara(tipo, especie, idade)
+Prot --> Svc : 5.1: ProtocoloVacinal
+Svc --> Svc : 6: calcularProximaDose (RN-04, RN-05)
+Svc --> Repo : 7: salvar(AplicacaoVacina)
+Repo --> Svc : 7.1: aplicacao(id)
+Svc --> MQ : 8: publicar(VacinaAplicadaEvent)
+MQ --> Agenda : 9: agendar lembrete 30 e 7 dias antes
+Svc --> Ctrl : 10: VacinaDTO
+Ctrl --> UI : 11: 201 Created
+UI --> Veterinario : 12: "Reforco em DD/MM"
+
+note bottom
+  Calculo de proxima dose:
+  - Antirrabica: + 365 dias
+  - V8/V10 jovem (menor 4 meses): + 21 dias
+  - V8/V10 adulto: + 365 dias
+end note
+
+@enduml

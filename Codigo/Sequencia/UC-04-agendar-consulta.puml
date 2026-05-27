@@ -1,0 +1,57 @@
+@startuml UC-04-agendar-consulta
+title VetCare+ - Sequencia UC-04: Agendar Consulta
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+autonumber
+
+actor Tutor
+participant "SPA React" as UI
+participant "API Gateway" as GW
+participant "ms-usuarios\n(AuthFilter)" as Auth
+participant "ms-agendamento\nConsultaController" as Ctrl
+participant "ConsultaService" as Svc
+participant "VeterinarioRepo" as VetRepo
+participant "ConsultaRepo" as ConsRepo
+queue "RabbitMQ" as MQ
+participant "ms-notificacao" as Notif
+
+Tutor -> UI : escolhe vet, pet, data
+UI -> GW : POST /api/consultas (JWT)
+GW -> Auth : validar token
+Auth --> GW : ok (claims)
+GW -> Ctrl : repassa requisicao
+Ctrl -> Svc : agendar(dto)
+
+Svc -> VetRepo : buscarPorId(vetId)
+VetRepo --> Svc : Veterinario(ativo, especialidade)
+
+Svc -> Svc : RN-10 valida especie x especialidade
+Svc -> ConsRepo : existeConflito(vetId, dataHora, janela=30min)
+ConsRepo --> Svc : false
+
+alt horario livre e validacoes ok
+  Svc -> ConsRepo : salvar(Consulta(status=AGENDADA))
+  ConsRepo --> Svc : consulta(id)
+  Svc -> MQ : publicar(ConsultaAgendadaEvent)
+  MQ -> Notif : consumir evento
+  Notif -> Notif : enfileirar lembrete 24h antes
+  Svc --> Ctrl : ConsultaDTO
+  Ctrl --> GW : 201 Created
+  GW --> UI : json + id
+  UI --> Tutor : "Consulta confirmada"
+else conflito de horario (RN-01)
+  Svc --> Ctrl : ConflitoHorarioException
+  Ctrl --> GW : 409 Conflict
+  GW --> UI : erro
+  UI --> Tutor : "Vet ocupado nesse horario"
+else especialidade incompativel (RN-10)
+  Svc --> Ctrl : EspecialidadeInvalidaException
+  Ctrl --> GW : 422
+  GW --> UI : erro
+  UI --> Tutor : "Vet nao atende essa especie"
+end
+
+@enduml

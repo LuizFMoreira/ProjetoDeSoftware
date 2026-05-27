@@ -1,0 +1,70 @@
+@startuml UC-11-pagar-consulta
+title VetCare+ - Sequencia UC-11: Pagar Consulta (Pix)
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor Tutor
+participant "SPA React" as UI
+participant "API Gateway" as GW
+participant "ms-pagamento\nPagamentoController" as Ctrl
+participant "PagamentoService" as Svc
+participant "PagamentoRepo" as Repo
+participant "Gateway Pix\n(externo)" as Pix
+queue "RabbitMQ" as MQ
+participant "ms-notificacao" as Notif
+participant "JobScheduler" as Job
+
+== Iniciar cobranca ==
+Tutor -> UI : escolhe Pix e confirma valor
+UI -> GW : POST /api/pagamentos (consultaId, metodo=PIX)
+GW -> Ctrl : iniciarPagamento(dto)
+Ctrl -> Svc : pagar(consultaId, PIX, valor)
+
+Svc -> Repo : criar(Pagamento(status=PENDENTE))
+Repo --> Svc : pagamento(id)
+
+Svc -> Pix : gerarCobranca(valor, idempotencyKey)
+Pix --> Svc : qrCode + txid + expiraEm=15min
+Svc -> Repo : atualizar(status=PROCESSANDO, txid)
+
+Svc --> Ctrl : QrCodeDTO
+Ctrl --> UI : 200 OK + qrcode
+UI --> Tutor : exibe QR Code
+
+== Confirmacao assincrona (ate 15 min) ==
+alt Pix confirmou (webhook)
+  Pix -> Ctrl : POST /webhook/pix (txid, status=APROVADO)
+  Ctrl -> Svc : confirmar(txid)
+  Svc -> Repo : atualizar(status=APROVADO, pagoEm=now)
+  Svc -> MQ : publicar(PagamentoConfirmadoEvent)
+  MQ -> Notif : enviar recibo por e-mail
+  note right of Svc
+    ms-agendamento consome o evento
+    e marca consulta como PAGA.
+  end note
+else Pix recusado (webhook)
+  Pix -> Ctrl : POST /webhook/pix (status=RECUSADO)
+  Ctrl -> Svc : registrarRecusa(txid)
+  Svc -> Repo : atualizar(status=RECUSADO)
+  Svc -> MQ : publicar(PagamentoRecusadoEvent)
+  MQ -> Notif : avisar tutor
+end
+
+== Job de expiracao (paralelo) ==
+group Verificacao periodica RN-08
+  Job -> Svc : verificarExpirados()
+  Svc -> Repo : listar(status=PROCESSANDO, expiraEm<now)
+  Repo --> Svc : pagamentos expirados
+  Svc -> Repo : atualizar(status=EXPIRADO)
+  Svc -> MQ : publicar(PagamentoExpiradoEvent)
+  MQ -> Notif : avisar tutor que cobranca expirou
+  note right of Svc
+    Consulta retorna para
+    AGUARDANDO_PAGAMENTO.
+  end note
+end
+
+@enduml

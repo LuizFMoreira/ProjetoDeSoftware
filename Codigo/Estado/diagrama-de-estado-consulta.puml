@@ -1,0 +1,42 @@
+@startuml estado-consulta
+title VetCare+ - Diagrama de Estados: Consulta
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam linetype polyline
+
+[*] --> AGENDADA : agendar() / RN-01 verifica conflito
+
+AGENDADA --> CONFIRMADA : tutor confirma\n/ enviar lembrete 24h
+AGENDADA --> CANCELADA : cancelar()\n[antecedencia >= 2h]
+AGENDADA --> CANCELADA : cancelar()\n[antecedencia < 2h]\n/ cobrar taxa 50% (RN-02)
+AGENDADA --> FALTOU : data passou sem check-in\n/ notificar tutor
+
+CONFIRMADA --> EM_ATENDIMENTO : vet inicia atendimento
+CONFIRMADA --> CANCELADA : cancelar()
+CONFIRMADA --> FALTOU : nao compareceu
+
+EM_ATENDIMENTO --> REALIZADA : registrarProntuario()\n[anamnese e diagnostico ok] (RN-07)
+
+REALIZADA --> AGUARDANDO_PAGAMENTO : prontuario fechado\n/ gerar cobranca
+
+AGUARDANDO_PAGAMENTO --> PAGA : pagamento confirmado
+AGUARDANDO_PAGAMENTO : entry / cobranca ativa
+AGUARDANDO_PAGAMENTO : Pix expirou (RN-08) / gerar nova cobranca
+
+PAGA --> [*]
+CANCELADA --> [*]
+FALTOU --> [*]
+
+note right of EM_ATENDIMENTO
+  Vet so pode editar
+  prontuario neste estado.
+end note
+
+note right of REALIZADA
+  RN-13: historico imutavel.
+  Correcoes entram como anotacao.
+end note
+
+@enduml

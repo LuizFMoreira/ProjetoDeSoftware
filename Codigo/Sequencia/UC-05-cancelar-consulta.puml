@@ -1,0 +1,52 @@
+@startuml UC-05-cancelar-consulta
+title VetCare+ - Sequencia UC-05: Cancelar Consulta
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor "Tutor / Recepcionista" as Solicitante
+participant "SPA React" as UI
+participant "API Gateway" as GW
+participant "ms-agendamento\nConsultaController" as Ctrl
+participant "ConsultaService" as Svc
+participant "ConsultaRepo" as ConsRepo
+participant "ms-pagamento" as Pag
+queue "RabbitMQ" as MQ
+participant "ms-notificacao" as Notif
+
+Solicitante -> UI : clica em "Cancelar"
+UI -> GW : DELETE /api/consultas/{id} (JWT, motivo)
+GW -> Ctrl : repassa
+Ctrl -> Svc : cancelar(consultaId, motivo, solicitanteId)
+
+Svc -> ConsRepo : buscarPorId(consultaId)
+ConsRepo --> Svc : Consulta(status, dataHora)
+
+alt consulta inexistente ou ja finalizada
+  Svc --> Ctrl : ConsultaInvalidaException
+  Ctrl --> GW : 404 / 409
+  GW --> UI : erro
+  UI --> Solicitante : "Nao e possivel cancelar"
+else dataHora futura
+  Svc -> Svc : calcular antecedencia
+  alt antecedencia < 2h (RN-02)
+    Svc -> Svc : taxa = 50% do valor
+    Svc -> ConsRepo : atualizar(status=CANCELADA, taxa)
+  else antecedencia >= 2h
+    Svc -> ConsRepo : atualizar(status=CANCELADA)
+  end
+  opt consulta ja paga
+    Svc -> Pag : estornar(pagamentoId)
+    Pag --> Svc : ok
+  end
+  Svc -> MQ : publicar(ConsultaCanceladaEvent)
+  MQ -> Notif : avisar tutor por e-mail
+  Svc --> Ctrl : ok
+  Ctrl --> GW : 200 OK
+  GW --> UI : 200 OK
+  UI --> Solicitante : "Consulta cancelada"
+end
+
+@enduml

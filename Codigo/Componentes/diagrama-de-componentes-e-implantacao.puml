@@ -1,0 +1,135 @@
+@startuml componentes
+title VetCare+ - Componentes e Implantacao (Microsservicos)
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+actor Tutor
+actor Recepcionista
+actor Veterinario
+actor "Administrador" as Admin
+
+node "Camada Cliente" {
+  [SPA Web (React + Vite)] as Web
+  [App Mobile (React Native)] as Mobile
+}
+
+node "Edge / CDN" {
+  [CloudFront] as CDN
+}
+
+node "Gateway" {
+  [API Gateway] as APIGW
+  [Application Load Balancer] as ALB
+}
+
+node "Cluster de Microsservicos (Docker / AWS ECS)" {
+
+  package "ms-usuarios" {
+    [Auth Controller] as AuthCtrl
+    [Usuario Service] as UsuarioSvc
+    database "usuarios_db" as DBUsuarios
+  }
+
+  package "ms-agendamento" {
+    [Agenda Controller] as AgendaCtrl
+    [Consulta Service] as ConsultaSvc
+    database "agendamento_db" as DBAgenda
+  }
+
+  package "ms-prontuario" {
+    [Prontuario Controller] as ProntCtrl
+    [Prontuario Service] as ProntSvc
+    [Vacina Service] as VacinaSvc
+    database "prontuario_db" as DBProntuario
+  }
+
+  package "ms-pagamento" {
+    [Pagamento Controller] as PagCtrl
+    [Pagamento Service] as PagSvc
+    database "pagamento_db" as DBPag
+  }
+
+  package "ms-notificacao" {
+    [Notificacao Worker] as NotifWorker
+    [Lembrete Scheduler] as Scheduler
+    database "notificacao_db" as DBNotif
+  }
+
+  package "ms-relatorios" {
+    [Relatorio Controller] as RelCtrl
+    [Relatorio Service] as RelSvc
+  }
+}
+
+queue "RabbitMQ\n(barramento de eventos)" as MQ
+
+cloud "Servicos Externos" {
+  [Gateway Pix / Cartao] as ExtPag
+  [SMTP (SendGrid)] as SMTP
+  [S3 (anexos/exames)] as S3
+}
+
+Tutor --> Web
+Recepcionista --> Web
+Veterinario --> Web
+Admin --> Web
+Tutor --> Mobile
+
+Web --> CDN
+Mobile --> CDN
+CDN --> APIGW
+APIGW --> ALB
+
+ALB --> AuthCtrl
+ALB --> AgendaCtrl
+ALB --> ProntCtrl
+ALB --> PagCtrl
+ALB --> RelCtrl
+
+AuthCtrl --> UsuarioSvc
+UsuarioSvc --> DBUsuarios
+
+AgendaCtrl --> ConsultaSvc
+ConsultaSvc --> DBAgenda
+
+ProntCtrl --> ProntSvc
+ProntCtrl --> VacinaSvc
+ProntSvc --> DBProntuario
+VacinaSvc --> DBProntuario
+
+PagCtrl --> PagSvc
+PagSvc --> DBPag
+PagSvc --> ExtPag
+
+RelCtrl --> RelSvc
+RelSvc --> PagCtrl : GET pagos (REST)
+RelSvc --> AgendaCtrl : GET consultas (REST)
+
+ConsultaSvc ..> MQ : publica eventos
+VacinaSvc  ..> MQ : publica eventos
+PagSvc     ..> MQ : publica eventos
+
+MQ ..> NotifWorker : consome eventos
+Scheduler --> NotifWorker
+NotifWorker --> DBNotif
+NotifWorker --> SMTP
+
+ProntSvc --> S3 : upload exames
+
+note right of MQ
+  Topicos: ConsultaAgendada,
+  ConsultaCancelada, VacinaAplicada,
+  PagamentoConfirmado, PagamentoExpirado.
+end note
+
+note bottom of UsuarioSvc
+  Autenticacao JWT e validada
+  no API Gateway via AuthFilter,
+  evitando chamadas cross-service.
+end note
+
+@enduml

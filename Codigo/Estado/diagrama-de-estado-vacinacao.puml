@@ -1,0 +1,31 @@
+@startuml estado-vacinacao
+title VetCare+ - Diagrama de Estados: Vacinacao do Pet
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam linetype polyline
+
+[*] --> PENDENTE : pet cadastrado\nou reforco agendado
+
+PENDENTE --> APLICADA : vet registra aplicacao\n/ calcular proximaDose (RN-04, RN-05)
+
+APLICADA --> VENCENDO : proximaDose - 30 dias\n/ enviar lembrete
+
+VENCENDO --> VENCENDO : proximaDose - 7 dias\n/ enviar segundo lembrete
+VENCENDO --> VENCIDA : passou da proximaDose\n/ marcar vencida e notificar
+
+VENCIDA --> REFORCO_APLICADO : tutor traz o pet\n/ vet aplica reforco
+APLICADA --> REFORCO_APLICADO : reforco no prazo\n/ tutor adiantou
+
+REFORCO_APLICADO --> APLICADA : reinicia ciclo\n/ atualizar proximaDose
+
+VENCIDA --> [*] : pet inativado / obito
+
+note right of APLICADA
+  Antirrabica: +365 dias
+  V8/V10 jovem: +21 dias
+  V8/V10 adulto: +365 dias
+end note
+
+@enduml

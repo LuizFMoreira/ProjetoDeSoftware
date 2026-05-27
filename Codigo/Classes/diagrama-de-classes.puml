@@ -1,0 +1,277 @@
+@startuml classes
+title VetCare+ - Diagrama de Classes (dominio)
+
+skinparam dpi 110
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classAttributeFontSize 11
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 55
+skinparam ranksep 55
+hide circle
+hide empty members
+
+package "Usuarios" as PkgUsuarios {
+
+  interface Autenticavel {
+    + autenticar(senha): boolean
+    + redefinirSenha(nova): boolean
+  }
+
+  abstract class Usuario {
+    - id: Long
+    - nome: String
+    - email: String
+    - senhaHash: String
+    - telefone: String
+    - status: StatusUsuario
+    + atualizarPerfil(dados): void
+  }
+
+  class Tutor {
+    - cpf: String
+    - dataNascimento: Date
+    - endereco: String
+    + cadastrarPet(pet): Pet
+    + listarMeusPets(): List<Pet>
+  }
+
+  class Recepcionista {
+    - matricula: String
+    - turno: String
+  }
+
+  class Veterinario {
+    - crmv: String
+    - especialidade: Especialidade
+    - cargaHorariaSemanal: int
+    + verificarDisponibilidade(data): boolean
+    + atender(consultaId): void
+  }
+
+  class Administrador {
+    - nivelAcesso: String
+  }
+
+  enum StatusUsuario {
+    ATIVO
+    INATIVO
+    BLOQUEADO
+  }
+
+  enum Especialidade {
+    CLINICA_GERAL
+    CIRURGIA
+    DERMATOLOGIA
+    ODONTOLOGIA
+    ORTOPEDIA
+    FELINOS
+  }
+
+  Autenticavel <|.. Usuario
+  Usuario <|-- Tutor
+  Usuario <|-- Recepcionista
+  Usuario <|-- Veterinario
+  Usuario <|-- Administrador
+}
+
+package "Atendimento" as PkgAtendimento {
+
+  class Pet {
+    - id: Long
+    - nome: String
+    - especie: EspecieAnimal
+    - raca: String
+    - dataNascimento: Date
+    - peso: double
+    - sexo: String
+    - status: StatusPet
+    + inativar(motivo): void
+  }
+
+  class Consulta {
+    - id: Long
+    - dataHora: DateTime
+    - status: StatusConsulta
+    - tipo: TipoConsulta
+    - motivo: String
+    - valor: BigDecimal
+    + agendar(): void
+    + cancelar(motivo): void
+    + reagendar(novaData): void
+    + iniciarAtendimento(): void
+    + concluir(): void
+  }
+
+  class Prontuario {
+    - id: Long
+    - anamnese: String
+    - diagnostico: String
+    - observacoes: String
+    - criadoEm: DateTime
+    - assinadoPor: Veterinario
+    + adicionarAnotacao(texto): void
+  }
+
+  enum EspecieAnimal {
+    CACHORRO
+    GATO
+    AVE
+    ROEDOR
+    REPTIL
+    EXOTICO
+  }
+
+  enum StatusPet {
+    ATIVO
+    INATIVO_TRANSFERIDO
+    OBITO
+  }
+
+  enum StatusConsulta {
+    AGENDADA
+    CONFIRMADA
+    EM_ATENDIMENTO
+    REALIZADA
+    AGUARDANDO_PAGAMENTO
+    PAGA
+    CANCELADA
+    FALTOU
+  }
+
+  enum TipoConsulta {
+    ROTINA
+    EMERGENCIA
+    RETORNO
+    CIRURGIA
+  }
+
+  Pet "1" --> "0..*" Consulta : recebe
+  Consulta "1" --> "0..1" Prontuario : gera
+}
+
+package "Vacinacao" as PkgVacinacao {
+
+  class Vacina {
+    - id: Long
+    - nome: String
+    - tipo: TipoVacina
+    - especiesAlvo: List<EspecieAnimal>
+    - intervaloReforcoDias: int
+  }
+
+  class AplicacaoVacina {
+    - id: Long
+    - dataAplicacao: Date
+    - lote: String
+    - proximaDose: Date
+    + calcularProximaDose(): Date
+  }
+
+  enum TipoVacina {
+    ANTIRRABICA
+    V8
+    V10
+    GIARDIA
+    GRIPE_CANINA
+    TRIPLICE_FELINA
+    QUADRUPLA_FELINA
+  }
+}
+
+Pet "1" -- "0..*" Vacina : aplicada em >
+(Pet, Vacina) .. AplicacaoVacina
+Prontuario "1" --> "0..*" AplicacaoVacina : registra
+
+package "Prescricao" as PkgPrescricao {
+
+  class Prescricao {
+    - id: Long
+    - posologia: String
+    - duracaoDias: int
+    - dataEmissao: Date
+  }
+
+  class Medicamento {
+    - id: Long
+    - nome: String
+    - principioAtivo: String
+    - controlado: boolean
+  }
+
+  Prescricao "*" --> "1..*" Medicamento : contem
+}
+
+Prontuario "1" --> "0..*" Prescricao : emite
+
+package "Financeiro" as PkgFinanceiro {
+
+  class Pagamento {
+    - id: Long
+    - valor: BigDecimal
+    - metodo: MetodoPagamento
+    - status: StatusPagamento
+    - pagoEm: DateTime
+    - tentativas: int
+    + processar(): boolean
+    + estornar(motivo): void
+  }
+
+  enum MetodoPagamento {
+    PIX
+    CARTAO_CREDITO
+    CARTAO_DEBITO
+    DINHEIRO
+  }
+
+  enum StatusPagamento {
+    PENDENTE
+    PROCESSANDO
+    APROVADO
+    CONFIRMADO
+    RECUSADO
+    EXPIRADO
+    ESTORNADO
+  }
+}
+
+Consulta "1" --> "0..1" Pagamento : tem
+
+package "Comunicacao" as PkgComunicacao {
+
+  class Notificacao {
+    - id: Long
+    - canal: CanalNotificacao
+    - assunto: String
+    - mensagem: String
+    - status: StatusNotificacao
+    - tentativas: int
+    - enviadaEm: DateTime
+  }
+
+  enum CanalNotificacao {
+    EMAIL
+    SMS
+    PUSH
+  }
+
+  enum StatusNotificacao {
+    PENDENTE
+    ENVIADA
+    FALHA
+    DESCARTADA
+  }
+}
+
+Usuario     "1"    --> "0..*" Notificacao : destinatario
+Consulta    "0..1" --> "0..*" Notificacao : origem
+
+Tutor          "1" --> "0..*" Pet      : possui
+Veterinario    "1" --> "0..*" Consulta : atende
+Recepcionista  "1" --> "0..*" Consulta : registra
+AplicacaoVacina "*" --> "1" Vacina     : refere
+Prontuario "1" ..> "1" Veterinario     : assinado por
+
+@enduml

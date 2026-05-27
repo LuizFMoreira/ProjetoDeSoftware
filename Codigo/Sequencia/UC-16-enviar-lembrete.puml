@@ -1,0 +1,40 @@
+@startuml UC-16-enviar-lembrete
+title VetCare+ - Sequencia UC-16: Job de Envio de Lembretes
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+participant "Cron Scheduler" as Cron
+participant "ms-notificacao\nLembreteScheduler" as Sched
+participant "NotificacaoRepo" as Repo
+participant "EmailGateway\n(SMTP)" as SMTP
+actor "Administrador" as Admin
+
+Cron -> Sched : tick (a cada 5min)
+Sched -> Repo : buscarPendentes(dataEnvio <= now)
+Repo --> Sched : lista de Notificacao
+
+loop para cada notificacao
+  Sched -> SMTP : enviar(email, assunto, msg)
+
+  alt envio ok
+    SMTP --> Sched : 250 OK
+    Sched -> Repo : atualizar(status=ENVIADA, enviadaEm=now)
+  else falha temporaria (bounce ou timeout)
+    SMTP --> Sched : erro
+    Sched -> Sched : tentativas++
+    alt tentativas < 3 (RN-12)
+      Sched -> Repo : atualizar(tentativas, status=PENDENTE)
+      note right : retry em 30min
+    else tentativas >= 3
+      Sched -> Repo : atualizar(status=DESCARTADA)
+      Sched ->> Admin : alerta de falha de envio
+    end
+  end
+end
+
+Sched --> Cron : ciclo concluido
+
+@enduml

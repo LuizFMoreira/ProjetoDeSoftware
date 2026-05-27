@@ -1,0 +1,45 @@
+@startuml UC-15-gerar-relatorio
+title VetCare+ - Sequencia UC-15: Gerar Relatorio Financeiro Mensal
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+autonumber
+
+actor "Administrador" as Admin
+participant "SPA React" as UI
+participant "API Gateway" as GW
+participant "ms-relatorios\nRelatorioController" as Ctrl
+participant "RelatorioService" as Svc
+participant "ms-pagamento\nAPI" as PagAPI
+participant "ms-agendamento\nAPI" as ConsAPI
+participant "PDFGenerator" as PDF
+
+Admin -> UI : seleciona mes/ano e filtros
+UI -> GW : GET /api/relatorios/financeiro?mes=05&ano=2026 (JWT)
+GW -> Ctrl : repassa
+Ctrl -> Svc : gerar(mesRef, filtros)
+
+Svc -> PagAPI : listarPagos(inicio, fim) [RN-11]
+PagAPI --> Svc : List<Pagamento>
+
+opt filtro por veterinario
+  Svc -> ConsAPI : consultasPorVet(vetId, periodo)
+  ConsAPI --> Svc : List<Consulta>
+end
+
+Svc -> Svc : agregar(total bruto, por metodo, por vet)
+
+alt mes sem dados
+  Svc --> Ctrl : RelatorioVazio
+  Ctrl --> UI : 204 No Content
+  UI --> Admin : "Sem movimento no periodo"
+else dados encontrados
+  Svc -> PDF : renderizar(template, dados)
+  PDF --> Svc : pdf bytes
+  Svc --> Ctrl : RelatorioDTO + url download
+  Ctrl --> UI : 200 + link
+  UI --> Admin : exibe resumo e botao "Baixar PDF"
+end
+
+@enduml

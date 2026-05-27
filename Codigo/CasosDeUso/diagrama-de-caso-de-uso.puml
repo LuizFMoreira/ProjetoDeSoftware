@@ -1,0 +1,126 @@
+@startuml casos-de-uso
+title VetCare+ - Diagrama de Casos de Uso
+
+skinparam dpi 110
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam ranksep 35
+skinparam nodesep 25
+skinparam actor {
+  BorderColor #2C3E50
+  BackgroundColor #ECF0F1
+}
+skinparam usecase {
+  BorderColor #34495E
+  BackgroundColor #FDFEFE
+  ArrowColor #7F8C8D
+  ArrowThickness 1
+}
+skinparam ArrowColor #7F8C8D
+skinparam ArrowThickness 1
+hide stereotype
+
+actor "Usuario\n(abstrato)" as Usuario
+actor "Tutor"         as Tutor
+actor "Recepcionista" as Recep
+actor "Veterinario"   as Vet
+actor "Administrador" as Admin
+
+Usuario <|-- Tutor
+Usuario <|-- Recep
+Usuario <|-- Vet
+Usuario <|-- Admin
+
+actor "Gateway\nde Pagamento" as Pagamento <<external>>
+actor "Servico\nde E-mail"    as Email     <<external>>
+
+rectangle "Sistema VetCare+" {
+
+  together {
+    usecase "UC-01\nAutenticar" as UC01
+    usecase "UC-16\nNotificar"  as UC16
+    usecase "UC-02\nGerenciar Perfil" as UC02
+  }
+
+  together {
+    usecase "UC-03\nCadastrar Pet"      as UC03
+    usecase "UC-04\nAgendar Consulta"   as UC04
+    usecase "UC-05\nCancelar Consulta"  as UC05
+    usecase "UC-06\nReagendar Consulta" as UC06
+    usecase "UC-11\nPagar Consulta"     as UC11
+    usecase "UC-13\nVer Prontuario do Pet" as UC13
+  }
+
+  together {
+    usecase "UC-07\nAtender Consulta"        as UC07
+    usecase "UC-08\nRegistrar Prontuario"    as UC08
+    usecase "UC-09\nPrescrever Medicamento"  as UC09
+    usecase "UC-10\nAplicar Vacina"          as UC10
+    usecase "UC-12\nVisualizar Agenda do Dia" as UC12
+  }
+
+  together {
+    usecase "UC-14\nGerenciar Veterinarios"     as UC14
+    usecase "UC-15\nGerar Relatorio Financeiro" as UC15
+  }
+}
+
+Usuario -- UC02
+
+Tutor -- UC03
+Tutor -- UC04
+Tutor -- UC05
+Tutor -- UC06
+Tutor -- UC11
+Tutor -- UC13
+
+Recep -- UC04
+Recep -- UC05
+Recep -- UC06
+Recep -- UC11
+Recep -- UC12
+
+Vet -- UC07
+Vet -- UC08
+Vet -- UC09
+Vet -- UC10
+Vet -- UC12
+Vet -- UC13
+
+Admin -- UC14
+Admin -- UC15
+
+UC11 -- Pagamento
+UC16 -- Email
+
+UC08 ..> UC07 : <<include>>
+UC04 ..> UC16 : <<include>>
+UC05 ..> UC16 : <<include>>
+UC10 ..> UC16 : <<include>>
+
+UC09 ..> UC07 : <<extend>>
+UC10 ..> UC07 : <<extend>>
+UC06 ..> UC05 : <<extend>>
+
+note top of UC01
+  **Pre-condicao global**
+  Todos os UCs (exceto UC-02 em
+  primeiro acesso) incluem UC-01.
+end note
+
+note right of UC11
+  Integracao externa via
+  Gateway de Pagamento.
+  Regras: RN-08
+end note
+
+note bottom of UC16
+  Disparado em agendamento,
+  cancelamento e vacinacao.
+  Regra: RN-12
+end note
+
+@enduml
